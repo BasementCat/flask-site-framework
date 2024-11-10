@@ -1,0 +1,34 @@
+{% extends 'bootstrap/base.html' %}
+
+{# core stuff common to literally everything #}
+
+{% block body_attribs %}{{ super() }} class="{% block body_class %}{% endblock %}" {% endblock %}
+
+{% block metas %}
+    {{ super() }}
+    {% for data in (publish_event('base.template.meta_tags', []) or []) %}
+        {{ data }}
+    {% endfor %}
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    {% for stylesheet in (publish_event('base.template.stylesheets', []) or []) %}
+        {% if stylesheet.startswith('<') %}
+            {{ stylesheet }}
+        {% else %}
+            <link rel="stylesheet" href="{{ stylesheet }}" />
+        {% endif %}
+    {% endfor %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {% for script in (publish_event('base.template.scripts', []) or []) %}
+        {% if script.startswith('<') %}
+            {{ script }}
+        {% else %}
+            <script src="{{ script }}"></script>
+        {% endif %}
+    {% endfor %}
+{% endblock %}
