@@ -11,9 +11,3 @@ dependencies = [
 requires-python = ">= 3.8"
 description = "Add a mailing list to a site"
 readme = "README.md"
-
-[tool.setuptools]
-packages = ["bc_fsf_mailing_list"]
-
-[tool.setuptools.package-dir]
-bc_fsf_mailing_list = "."

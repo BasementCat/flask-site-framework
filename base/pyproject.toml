@@ -18,9 +18,3 @@ dependencies = [
 requires-python = ">= 3.8"
 description = "Base plugins & app factory"
 readme = "README.md"
-
-[tool.setuptools]
-packages = ["bc_fsf_base"]
-
-[tool.setuptools.package-dir]
-bc_fsf_base = "."
