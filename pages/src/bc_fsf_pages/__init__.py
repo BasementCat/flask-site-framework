@@ -7,9 +7,9 @@ import json
 
 from flask import current_app, url_for, g
 
-from app.plugins.base import Plugin
-from app.plugins.base import cache, event
-from app.plugins.base.jinja import route_matches
+from bc_fsf_base import Plugin
+from bc_fsf_base import cache, event
+from bc_fsf_base.jinja import route_matches
 
 
 class PagesPlugin(Plugin):

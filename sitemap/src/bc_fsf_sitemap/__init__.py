@@ -10,8 +10,8 @@ import shutil
 from flask import current_app, url_for
 import arrow
 
-from app.plugins.base import Plugin
-from app.plugins.base import event
+from bc_fsf_base import Plugin
+from bc_fsf_base import event
 
 
 logger = logging.getLogger(__name__)

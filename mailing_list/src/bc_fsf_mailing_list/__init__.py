@@ -5,7 +5,7 @@ from typing import Optional
 from flask import url_for, request, current_app
 from markupsafe import Markup
 
-from app.plugins.base import Plugin
+from bc_fsf_base import Plugin
 
 from .models import Email
 

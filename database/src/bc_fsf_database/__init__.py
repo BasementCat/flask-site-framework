@@ -7,8 +7,8 @@ from alembic import context
 from alembic.autogenerate import rewriter
 from alembic.operations import ops
 
-from app.plugins.base import Plugin
-from app.plugins.base import event
+from bc_fsf_base import Plugin
+from bc_fsf_base import event
 
 from . import db_types
 

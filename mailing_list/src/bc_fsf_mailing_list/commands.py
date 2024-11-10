@@ -11,7 +11,7 @@ from tabulate import tabulate
 import arrow
 from markdown import markdown
 
-from app.plugins.database import db
+from bc_fsf_database import db
 from .models import Email
 
 

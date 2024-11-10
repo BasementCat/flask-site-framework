@@ -7,8 +7,8 @@ from flask import Blueprint, request, current_app, abort, flash, redirect, url_f
 from sqlalchemy.exc import IntegrityError
 import purl
 
-from app.plugins.base import decorator
-from app.plugins.database import db
+from bc_fsf_base import decorator
+from bc_fsf_database import db
 from .models import Email
 
 

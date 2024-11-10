@@ -2,8 +2,8 @@
 
 import uuid
 
-from app.plugins.database import db
-from app.plugins.database.mixins import TimestampMixin
+from bc_fsf_database import db
+from bc_fsf_database.mixins import TimestampMixin
 
 
 class Email(TimestampMixin, db.Model):

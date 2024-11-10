@@ -15,3 +15,6 @@ dependencies = [
 requires-python = ">= 3.8"
 description = "Use a database/sqlalchemy with a site"
 readme = "README.md"
+
+[tool.setuptools.package-data]
+bc_fsf_database = ["env.py.template"]
