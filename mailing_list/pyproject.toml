@@ -13,4 +13,4 @@ description = "Add a mailing list to a site"
 readme = "README.md"
 
 [tool.setuptools.package-data]
-bc_fsf_mailing_list = ["templates/"]
+bc_fsf_mailing_list = ["templates/*"]
