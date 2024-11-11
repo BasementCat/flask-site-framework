@@ -23,4 +23,4 @@ readme = "README.md"
 where = ["src"]
 
 [tool.setuptools.package-data]
-bc_fsf_base = ["*.j2"]
+bc_fsf_base = ["**.j2"]
