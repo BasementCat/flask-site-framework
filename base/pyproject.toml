@@ -19,5 +19,8 @@ requires-python = ">= 3.8"
 description = "Base plugins & app factory"
 readme = "README.md"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.setuptools.package-data]
 bc_fsf_base = ["*.j2"]

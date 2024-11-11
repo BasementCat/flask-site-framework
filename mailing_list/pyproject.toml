@@ -12,5 +12,8 @@ requires-python = ">= 3.8"
 description = "Add a mailing list to a site"
 readme = "README.md"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.setuptools.package-data]
 bc_fsf_mailing_list = ["*.j2"]
