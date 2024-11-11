@@ -20,4 +20,4 @@ description = "Base plugins & app factory"
 readme = "README.md"
 
 [tool.setuptools.package-data]
-bc_fsf_base = ["templates/*"]
+bc_fsf_base = ["*.j2"]
