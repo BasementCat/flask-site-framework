@@ -178,6 +178,11 @@ class ConfigLoader:
 
         self.config_opts = {}
         self.add_opts({
+            'SITE_NAME': {
+                'parser': str,
+                'required': True,
+                'description': "Name of the site used for page titles and in other places",
+            },
             'DEBUG': {
                 'source': ['FLASK_DEBUG', 'DEBUG'],
                 'parser': bool,
@@ -354,6 +359,14 @@ class ConfigLoader:
             raise RuntimeError("Config loading failed:\n" + "\n".join(errors))
         return config
 
+    def list(self, config=None):
+        for k, v in self.config_opts.items():
+            item = dict(v)
+            del item['parser']
+            item['key'] = k
+            item['value'] = (config or {}).get(k)
+            yield item
+
 
 class AppFactory:
     """\
@@ -473,15 +486,15 @@ class AppFactory:
             static_folder=os.path.join(self.base_path, 'static'),
         )
 
-        config = ConfigLoader()
+        app.config_loader = ConfigLoader()
 
         app.base_plugin_module = __name__
         app.plugins = {}
         for p in self.plugins:
             app.plugins[p.name] = p
-            config.add_opts(p.get_config())
+            app.config_loader.add_opts(p.get_config())
 
-        app.config.update(config())
+        app.config.update(app.config_loader())
 
         # Do not init plugins until after config is applied
         for p in self.plugins:
@@ -491,6 +504,10 @@ class AppFactory:
 
         # hax
         app.jinja_env.auto_reload = bool(app.config.get('TEMPLATES_AUTO_RELOAD'))
+
+        # more hax - commands not part of a base plugin
+        from .commands import cli_config
+        app.cli.add_command(cli_config)
 
         self._register_error_handlers(app)
 
