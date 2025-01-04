@@ -1,10 +1,9 @@
 import os
 from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
-from importlib import reload
 import functools
 
-from flask import Flask, abort, redirect, url_for, session, request
+from flask import Flask
 
 
 @contextmanager
@@ -34,62 +33,6 @@ def mock_blueprint(app, bp, prefix=''):
     app.register_blueprint(bp, url_prefix=prefix)
     client = app.test_client()
     yield client
-
-
-@contextmanager
-def mock_require(module, callbacks=None, default=None):
-    callbacks = callbacks or {}
-    def default_callback(dec, *args, **kwargs):
-        def default_impl(cb):
-            return cb
-        return default_impl
-    default = default or default_callback
-
-    def handle_callback(dec, *args, **kwargs):
-        if dec in callbacks:
-            return callbacks[dec](*args, **kwargs)
-        else:
-            return default(dec, *args, **kwargs)
-
-    patch('bc_fsf_base.require', handle_callback).start()
-    reload(module)
-    yield module
-    patch.stopall()
-    reload(module)
-
-
-@contextmanager
-def mock_user_cb(module, *permissions, user=None, curuser=None):
-    def mock_load(current=False, user_key='user', abort_on_missing=True, *args, **kwargs):
-        def mock_load_impl(callback):
-            @functools.wraps(callback)
-            def mock_load_wrap(*args, **kwargs):
-                kwargs[user_key] = curuser if current else user
-                if not kwargs[user_key] and abort_on_missing:
-                    abort(404, "No matching user was found")
-                return callback(*args, **kwargs)
-            return mock_load_wrap
-        return mock_load_impl
-
-    def mock_can(*perms, always_abort=False, **kwargs):
-        def mock_can_impl(callback):
-            @functools.wraps(callback)
-            def mock_can_wrap(*args, **kwargs):
-                for p in perms:
-                    if p in permissions:
-                        return callback(*args, **kwargs)
-                if curuser:
-                    abort(401, "You do not have permission to view this page")
-                else:
-                    if always_abort:
-                        abort(403, "You do not have permission to view this page")
-                    session['url_after_login'] = request.url
-                    return redirect(url_for('user.login'))
-            return mock_can_wrap
-        return mock_can_impl
-
-    with mock_require(module, {'user.load': mock_load, 'user.can': mock_can}) as relmod:
-        yield relmod
 
 
 class MockUser:

@@ -1,11 +1,94 @@
+import os
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 from contextlib import contextmanager
+import functools
+from importlib import reload
 
-from flask import session
+from flask import abort, redirect, url_for, session, request
 
 from bc_fsf_user import view
-from . import mock_app, mock_blueprint, mock_user_cb, mock_real_app
+from . import mock_app, mock_blueprint, mock_real_app
+
+
+@contextmanager
+def mock_require(module, callbacks=None, default=None):
+    callbacks = callbacks or {}
+    def default_callback(dec, *args, **kwargs):
+        def default_impl(cb):
+            return cb
+        return default_impl
+    default = default or default_callback
+
+    def handle_callback(dec, *args, **kwargs):
+        if dec in callbacks:
+            return callbacks[dec](*args, **kwargs)
+        else:
+            return default(dec, *args, **kwargs)
+
+    patch('bc_fsf_base.require', handle_callback).start()
+    reload(module)
+    yield module
+    patch.stopall()
+    reload(module)
+
+
+@contextmanager
+def mock_user_cb(module, *permissions, user=None, curuser=None):
+    def mock_load(current=False, user_key='user', abort_on_missing=True, *args, **kwargs):
+        def mock_load_impl(callback):
+            @functools.wraps(callback)
+            def mock_load_wrap(*args, **kwargs):
+                kwargs[user_key] = curuser if current else user
+                if not kwargs[user_key] and abort_on_missing:
+                    abort(404, "No matching user was found")
+                return callback(*args, **kwargs)
+            return mock_load_wrap
+        return mock_load_impl
+
+    def mock_can(*perms, always_abort=False, **kwargs):
+        def mock_can_impl(callback):
+            @functools.wraps(callback)
+            def mock_can_wrap(*args, **kwargs):
+                for p in perms:
+                    if p in permissions:
+                        return callback(*args, **kwargs)
+                if curuser:
+                    abort(401, "You do not have permission to view this page")
+                else:
+                    if always_abort:
+                        abort(403, "You do not have permission to view this page")
+                    session['url_after_login'] = request.url
+                    return redirect(url_for('user.login'))
+            return mock_can_wrap
+        return mock_can_impl
+
+    with mock_require(module, {'user.load': mock_load, 'user.can': mock_can}) as relmod:
+        yield relmod
+
+
+def mock_user_view(*permissions, upd_config=None, has_user=False, has_curuser=False):
+    def mock_user_view_dec(callback):
+        @functools.wraps(callback)
+        def mock_user_view_wrap(*args, **kwargs):
+            user = MagicMock() if has_user else None
+            curuser = MagicMock if has_curuser else None
+            with mock_user_cb(view, *permissions, user=user, curuser=curuser) as testview:
+                config = {
+                    'SECRET_KEY': 'ljsdflk',
+                    'SITE_TIMEZONE': 'America/Chicago',
+                    'USERS_ALLOW_SIGNUP': True,
+                    'TESTING': True,
+                    'WTF_CSRF_ENABLED': False,
+                    'USERS_ADMIN_APPROVAL': False,
+                }
+                config.update(upd_config or {})
+                with mock_real_app(config) as app:
+                    app.plugins = {'user': MagicMock}
+                    with mock_blueprint(app, testview.bp) as client:
+                        return callback(*args, app=app, client=client, user=user, curuser=curuser, **kwargs)
+        return mock_user_view_wrap
+    return mock_user_view_dec
 
 
 @patch('bc_fsf_user.view.redirect')
@@ -24,111 +107,295 @@ class TestRedirAfterLogin(TestCase):
             self.assertIsNone(session.get('url_after_login'))
 
 
-# @contextmanager
-# def mock_user_view(upd_config, *permissions, user=None, curuser=None):
-#     with mock_user_cb(view, *permissions, user=user, curuser=curuser) as testview:
-#         config = {
-#             'SECRET_KEY': 'ljsdflk',
-#             'SITE_TIMEZONE': 'America/Chicago',
-#             'USERS_ALLOW_SIGNUP': True,
-#             'TESTING': True,
-#             'WTF_CSRF_ENABLED': False,
-#         }
-#         config.update(upd_config)
-#         with mock_real_app(config) as app:
-#             app.plugins = {'user': MagicMock}
-#             with mock_blueprint(app, testview.bp) as client:
-#                 yield app, client
+class TestView__Signup(TestCase):
+    @mock_user_view('signup')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    def test_signup__get(self, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        res = client.get('/signup')
+        self.assertIn(b'Sign Up', res.data)
 
+    @mock_user_view()
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    def test_signup__get__disabled(self, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        res = client.get('/signup')
+        self.assertIn('Location', res.headers)
+        self.assertEqual(res.headers['Location'], '/login')
 
-# # TODO: patching before reimport (mock_user_view)
-# @patch('bc_fsf_user.view.event')
-# @patch('bc_fsf_user.view.redirect')
-# @patch('bc_fsf_user.view.url_for')
-# @patch('bc_fsf_user.view.flash')
-# class TestView__Signup(TestCase):
-#     def test_signup__get(self, mock_flash, mock_url_for, mock_redirect, mock_event):
-#         with mock_user_view({}, 'signup') as (app, client):
-#             res = client.get('/signup')
-#             self.assertIn(b'Sign Up', res.data)
+    @mock_user_view('signup')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    def test_signup__missing_fields(self, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        data = {}
+        res = client.post('/signup', data=data)
+        self.assertNotIn(b'token is missing', res.data)
+        self.assertIn(b'field is required', res.data)
 
-#     def test_signup__get__disabled(self, mock_flash, mock_url_for, mock_redirect, mock_event):
-#         with mock_user_view({'USERS_ALLOW_SIGNUP': False}) as (app, client):
-#             res = client.get('/signup')
-#             self.assertIn('Location', res.headers)
-#             self.assertEqual(res.headers['Location'], '/login')
+    @mock_user_view('signup')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_signup__create__exists(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        mock_user_cls.query.filter().count.return_value = 1
+        data = {
+            'username': 'foo',
+            'email': 'bar',
+            'update_password': 'baz',
+            'update_repassword': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        props = {
+            'username': 'foo',
+            'email': 'bar',
+            'password': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        res = client.post('/signup', data=data)
+        self.assertNotIn(b'token is missing', res.data)
+        self.assertNotIn(b'field is required', res.data)
+        mock_event.publish.assert_not_called()
+        mock_url_for.assert_not_called()
+        mock_redirect.assert_not_called()
+        self.assertIn(b'must be unique', res.data)
 
-#     def test_signup__missing_fields(self, mock_flash, mock_url_for, mock_redirect, mock_event):
-#         with mock_user_view({}, 'signup') as (app, client):
-#             data = {}
-#             res = client.post('/signup', data=data)
-#             self.assertNotIn(b'token is missing', res.data)
-#             self.assertIn(b'field is required', res.data)
+    @mock_user_view('signup')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_signup__create__no_user__warn_error(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        mock_user_cls.query.filter().count.return_value = 0
+        data = {
+            'username': 'foo',
+            'email': 'bar',
+            'update_password': 'baz',
+            'update_repassword': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        props = {
+            'username': 'foo',
+            'email': 'bar',
+            'password': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        mock_event.publish.return_value = (None, props, ['test warn'], ['test err'], {})
+        res = client.post('/signup', data=data)
+        self.assertNotIn(b'token is missing', res.data)
+        self.assertNotIn(b'field is required', res.data)
+        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_url_for.assert_not_called()
+        mock_redirect.assert_not_called()
+        mock_flash.assert_has_calls([
+            call('test err', 'danger'),
+            call('test warn', 'warn'),
+        ])
 
-#     @patch('bc_fsf_user.forms.User')
-#     def test_signup__create__exists(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event):
-#         with mock_user_view({}, 'signup') as (app, client):
-#             mock_user_cls.query.filter().count.return_value = 1
-#             data = {
-#                 'username': 'foo',
-#                 'email': 'bar',
-#                 'update_password': 'baz',
-#                 'update_repassword': 'baz',
-#                 'timezone': 'America/Chicago',
-#                 'name': 'asdf',
-#                 'bio': 'qwerty',
-#             }
-#             props = {
-#                 'username': 'foo',
-#                 'email': 'bar',
-#                 'password': 'baz',
-#                 'timezone': 'America/Chicago',
-#                 'name': 'asdf',
-#                 'bio': 'qwerty',
-#             }
-#             res = client.post('/signup', data=data)
-#             self.assertNotIn(b'token is missing', res.data)
-#             self.assertNotIn(b'field is required', res.data)
-#             mock_event.publish.assert_not_called()
-#             mock_url_for.assert_not_called()
-#             mock_redirect.assert_not_called()
-#             self.assertIn(b'must be unique', res.data)
+    @mock_user_view('signup')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_signup__create(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        mock_user_cls.query.filter().count.return_value = 0
+        data = {
+            'username': 'foo',
+            'email': 'bar',
+            'update_password': 'baz',
+            'update_repassword': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        props = {
+            'username': 'foo',
+            'email': 'bar',
+            'password': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        cr_user = MagicMock()
+        mock_event.publish.return_value = (cr_user, props, [], [], {})
+        res = client.post('/signup', data=data)
+        self.assertNotIn(b'token is missing', res.data)
+        self.assertNotIn(b'field is required', res.data)
+        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_url_for.assert_called_once_with('.login')
+        mock_redirect.assert_called_once_with(mock_url_for())
+        mock_flash.assert_has_calls([
+            call("Your account is created and you may now log in", 'success'),
+        ])
 
-#     @patch('bc_fsf_user.forms.User')
-#     def test_signup__create__no_user__warn_error(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event):
-#         with mock_user_view({}, 'signup') as (app, client):
-#             mock_user_cls.query.filter().count.return_value = 0
-#             data = {
-#                 'username': 'foo',
-#                 'email': 'bar',
-#                 'update_password': 'baz',
-#                 'update_repassword': 'baz',
-#                 'timezone': 'America/Chicago',
-#                 'name': 'asdf',
-#                 'bio': 'qwerty',
-#             }
-#             props = {
-#                 'username': 'foo',
-#                 'email': 'bar',
-#                 'password': 'baz',
-#                 'timezone': 'America/Chicago',
-#                 'name': 'asdf',
-#                 'bio': 'qwerty',
-#             }
-#             mock_event.publish.return_value = (None, props, ['test warn'], ['test err'], {})
-#             res = client.post('/signup', data=data)
-#             # mock_event.publish.assert_called_once_with('user.create', (props, None, None))
-#             self.assertNotIn(b'token is missing', res.data)
-#             self.assertNotIn(b'field is required', res.data)
-#             mock_event.publish.assert_not_called()
-#             mock_url_for.assert_not_called()
-#             mock_redirect.assert_not_called()
-#             self.assertIn(b'test warn', res.data)
-#             self.assertIn(b'test err', res.data)
+    @mock_user_view('signup', upd_config={'USERS_ADMIN_APPROVAL': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_signup__create__admin_approval(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        mock_user_cls.query.filter().count.return_value = 0
+        data = {
+            'username': 'foo',
+            'email': 'bar',
+            'update_password': 'baz',
+            'update_repassword': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        props = {
+            'username': 'foo',
+            'email': 'bar',
+            'password': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        cr_user = MagicMock()
+        mock_event.publish.return_value = (cr_user, props, [], [], {})
+        res = client.post('/signup', data=data)
+        self.assertNotIn(b'token is missing', res.data)
+        self.assertNotIn(b'field is required', res.data)
+        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_url_for.assert_called_once_with('.login')
+        mock_redirect.assert_called_once_with(mock_url_for())
+        mock_flash.assert_has_calls([
+            call("You will not be able to log in until an administrator approves your account", 'info'),
+        ])
 
-    # def test_signup__create(self, mock_flash, mock_url_for, mock_redirect, mock_event):
-    #     with mock_user_view({}, 'signup') as (app, client):
-    #         pass
+    @mock_user_view('signup', upd_config={'USERS_ADMIN_APPROVAL': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_signup__create__email_conf__success(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        mock_user_cls.query.filter().count.return_value = 0
+        data = {
+            'username': 'foo',
+            'email': 'bar',
+            'update_password': 'baz',
+            'update_repassword': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        props = {
+            'username': 'foo',
+            'email': 'bar',
+            'password': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        cr_user = MagicMock()
+        mock_event.publish.return_value = (cr_user, props, [], [], {'did_email_confirmation': True})
+        res = client.post('/signup', data=data)
+        self.assertNotIn(b'token is missing', res.data)
+        self.assertNotIn(b'field is required', res.data)
+        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_url_for.assert_called_once_with('.login')
+        mock_redirect.assert_called_once_with(mock_url_for())
+        mock_flash.assert_has_calls([
+            call("You will not be able to log in until an administrator approves your account", 'info'),
+            call("You have been sent an email to confirm your email address - please follow the instructions in the email before you can log in", 'info'),
+        ])
+
+    @mock_user_view('signup', upd_config={'USERS_ADMIN_APPROVAL': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_signup__create__email_conf__failed(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        mock_user_cls.query.filter().count.return_value = 0
+        data = {
+            'username': 'foo',
+            'email': 'bar',
+            'update_password': 'baz',
+            'update_repassword': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        props = {
+            'username': 'foo',
+            'email': 'bar',
+            'password': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        cr_user = MagicMock()
+        mock_event.publish.return_value = (cr_user, props, [], [], {'did_email_confirmation': False})
+        res = client.post('/signup', data=data)
+        self.assertNotIn(b'token is missing', res.data)
+        self.assertNotIn(b'field is required', res.data)
+        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_url_for.assert_called_once_with('.login')
+        mock_redirect.assert_called_once_with(mock_url_for())
+        mock_flash.assert_has_calls([
+            call("You will not be able to log in until an administrator approves your account", 'info'),
+            call("There was an error sending your confirmation email", 'danger'),
+        ])
+
+    @mock_user_view('signup', upd_config={'USERS_ADMIN_APPROVAL': False})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redirect')
+    @patch('bc_fsf_user.view.url_for')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_signup__create__email_conf__no_admin(self, mock_user_cls, mock_flash, mock_url_for, mock_redirect, mock_event, app, client, user, curuser):
+        mock_user_cls.query.filter().count.return_value = 0
+        data = {
+            'username': 'foo',
+            'email': 'bar',
+            'update_password': 'baz',
+            'update_repassword': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        props = {
+            'username': 'foo',
+            'email': 'bar',
+            'password': 'baz',
+            'timezone': 'America/Chicago',
+            'name': 'asdf',
+            'bio': 'qwerty',
+        }
+        cr_user = MagicMock()
+        mock_event.publish.return_value = (cr_user, props, [], [], {'did_email_confirmation': True})
+        res = client.post('/signup', data=data)
+        self.assertNotIn(b'token is missing', res.data)
+        self.assertNotIn(b'field is required', res.data)
+        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_url_for.assert_called_once_with('.login')
+        mock_redirect.assert_called_once_with(mock_url_for())
+        mock_flash.assert_has_calls([
+            call("You have been sent an email to confirm your email address - please follow the instructions in the email before you can log in", 'info'),
+        ])
+
+    # email confirmation & not admin approval
 
 # def _validate_unique(self, model_field, form_field):
 #             query = User.query.filter(model_field.like(form_field.data))
