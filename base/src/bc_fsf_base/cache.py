@@ -5,8 +5,11 @@ from typing import Any, Union, Optional
 from threading import Lock
 import time
 from functools import wraps
+import hashlib
+import pickle
 
 from flask import current_app
+from flask_redis import FlaskRedis
 
 
 class CacheDriver:
@@ -15,6 +18,18 @@ class CacheDriver:
 
     A cache driver implements the raw storage and retrieval of cache keys.
     """
+
+    def require_config(self, config: dict) -> dict:
+        """\
+        Modify the config keys of the caching plugin, in order to mark certain
+        config keys as required for this driver
+        """
+        return config
+
+    def get_flask_plugins(self):
+        """\
+        Get required flask plugins; see base plugin class
+        """
 
     def set(self, key: str, value: Any, expires_at: Optional[Union[int, float]]=None):
         """\
@@ -80,6 +95,38 @@ class MemoryCacheDriver(CacheDriver):
     def contains(self, key: str) -> bool:
         with self.lock:
             return key in self.data
+
+
+class RedisCacheDriver(CacheDriver):
+    """\
+    Mapping to Redis
+    """
+
+    def require_config(self, config: dict) -> dict:
+        config['REDIS_URL']['required'] = True
+        return config
+
+    def get_flask_plugins(self):
+        self.redis = FlaskRedis()
+        return [self.redis]
+
+    def set(self, key: str, value: Any, expires_at: Optional[Union[int, float]]=None):
+        self.redis.set(key, pickle.dumps(value), pxat=int(expires_at * 1000))
+
+    def get(self, key: str) -> Any:
+        res = self.redis.get(key)
+        if res is None:
+            raise KeyError(key)
+        return pickle.loads(res)
+
+    def delete(self, key: str):
+        # for compatibility - redis doesn't care if the key doesn't exist
+        if not self.contains(key):
+            raise KeyError(key)
+        self.redis.delete(key)
+
+    def contains(self, key: str) -> bool:
+        return self.redis.exists(key) > 0
 
 
 def _with_driver(callback):
@@ -180,3 +227,24 @@ def get_or_fetch(driver: Optional[CacheDriver], key: str, callback, expires_in: 
         value = callback()
         set(key, value, expires_in=expires_in, expires_at=expires_at)
         return value
+
+
+def make_key(*args, **kwargs) -> str:
+    """\
+    Given a list of key parts and optional kwargs, assemble a cache key.
+
+    Args are stringified and concatenated with ":", at least one is required.
+    If kwargs are present, they are sorted by key, and hashed, and appended to
+    the key.
+    """
+
+    if not args:
+        raise ValueError("At least one argument is required")
+
+    parts = list(map(str, args))
+    if kwargs:
+        kp = []
+        for k in sorted(kwargs.keys()):
+            kp.append(k + ':' + str(kwargs[k]))
+        parts.append(hashlib.new('sha256', ':'.join(kp)).hexdigest())
+    return ':'.join(parts)

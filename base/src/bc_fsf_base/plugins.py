@@ -77,6 +77,16 @@ class CachePlugin(Plugin):
         self.driver = driver or MemoryCacheDriver()
         super().__init__(app=app)
 
+    def get_config(self):
+        return self.driver.require_config({
+            'REDIS_URL': {
+                'description': "URI to connect to Redis, like redis://:password@localhost:6379/0 or unix://:password@/path/to/socket.sock?db=0",
+            },
+        })
+
+    def get_flask_plugins(self):
+        return self.driver.get_flask_plugins()
+
     def init_app(self, app):
         super().init_app(app)
         app._cache_driver = self.driver

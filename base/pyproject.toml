@@ -14,7 +14,9 @@ dependencies = [
     "purl",
     "markdown",
     "altcha",
-    "tabulate"
+    "tabulate",
+    "redis[hiredis]",
+    "flask-redis"
 ]
 requires-python = ">= 3.8"
 description = "Base plugins & app factory"
