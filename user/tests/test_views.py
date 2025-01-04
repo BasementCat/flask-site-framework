@@ -395,65 +395,59 @@ class TestView__Signup(TestCase):
             call("You have been sent an email to confirm your email address - please follow the instructions in the email before you can log in", 'info'),
         ])
 
-    # email confirmation & not admin approval
-
-# def _validate_unique(self, model_field, form_field):
-#             query = User.query.filter(model_field.like(form_field.data))
-#             if user and user.id:
-#                 query = query.filter(User.id != user.id)
-#             return query.count() == 0
-
-# @bp.route('/signup', methods=['GET', 'POST'])
-# @require('user.can', 'signup')
-# def signup():
-#     form = UserForm(None, 'signup')
-#     if form.validate_on_submit():
-#         data = {
-#             'username': form.username.data,
-#             'email': form.email.data,
-#             'password': form.update_password.data,
-#             'timezone': form.timezone.data,
-#             'name': form.name.data,
-#             'bio': form.bio.data,
-#         }
-#         user, props, warnings, errors, meta = event.publish('user.create', (data, None, None))
-#         for e in errors:
-#             flash(e, 'danger')
-#         for w in warnings:
-#             flash(w, 'warn')
-#         if user:
-#             if current_app.config['USERS_ADMIN_APPROVAL']:
-#                 flash("You will not be able to log in until an administrator approves your account", 'info')
-
-#             if meta.get('did_email_confirmation') is True:
-#                 flash("You have been sent an email to confirm your email address - please follow the instructions in the email before you can log in", 'info')
-#             elif meta.get('did_email_confirmation') is False:
-#                 flash("There was an error sending your confirmation email", 'danger')
-
-#             if meta.get('did_email_confirmation') is None and not current_app.config['USERS_ADMIN_APPROVAL']:
-#                 flash("Your account is created and you may now log in", 'success')
-
-#             return redirect(url_for('.login'))
-
-#     return render_template('user/signup.html.j2', form=form)
 
 
-# class TestView__Login(TestCase):
-#     pass
+class TestView__Login(TestCase):
+    @mock_user_view('login')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_get(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        res = client.get('/login')
+        self.assertIn(b'Log In', res.data)
 
-# # @bp.route('/login', methods=['GET', 'POST'])
-# # @require('user.can', 'login', always_abort=True)
-# # def login():
-# #     form = LoginForm()
-# #     user = form.validate_on_submit()
-# #     if user:
-# #         event.publish('user.login', user)
-# #         # TOTP redirection done by user.can - not on this url but next
-# #         return redir_after_login()
-# #     elif user is None:
-# #         flash("Invalid username or password", 'danger')
+    @mock_user_view()
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_no_perm(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        res = client.get('/login')
+        self.assertEqual(res.status_code, 403)
 
-# #     return render_template('user/login.html.j2', form=form)
+    @mock_user_view('login')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_no_data(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        res = client.post('/login', data={})
+        self.assertIn(b'field is required', res.data)
+
+    @mock_user_view('login')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_invalid_data(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        res = client.post('/login', data={'username_or_email': 'foo', 'password': 'bar'})
+        self.assertNotIn(b'field is required', res.data)
+        mock_flash.assert_called_once_with('Invalid username or password', 'danger')
+
+    @mock_user_view('login')
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_login(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        mock_user = MagicMock(password='bar')
+        mock_user_cls.query.filter().one.return_value = mock_user
+        mock_redir_login.return_value = 'foobar'
+        res = client.post('/login', data={'username_or_email': 'foo', 'password': 'bar'})
+        self.assertNotIn(b'field is required', res.data)
+        mock_redir_login.assert_called_once_with()
+        self.assertEqual(res.data, b'foobar')
 
 # class TestView__TOTPLogin(TestCase):
 #     pass
