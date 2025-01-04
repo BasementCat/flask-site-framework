@@ -15,7 +15,7 @@ from flask.cli import AppGroup
 from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv
 
-from . import jinja
+from . import jinja, event
 
 
 logger = logging.getLogger(__name__)
@@ -196,6 +196,11 @@ class ConfigLoader:
                 'parser': str,
                 'required': True,
                 'description': "Name of the site used for page titles and in other places",
+            },
+            'SITE_TIMEZONE': {
+                'parser': str,
+                'default': 'UTC',
+                'description': "Default timezone of the site",
             },
             'DEBUG': {
                 'source': ['FLASK_DEBUG', 'DEBUG'],
@@ -524,5 +529,7 @@ class AppFactory:
         app.cli.add_command(cli_config)
 
         self._register_error_handlers(app)
+
+        event.publish('app.loaded', app)
 
         return app

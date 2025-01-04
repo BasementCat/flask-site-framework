@@ -1,6 +1,8 @@
 """Simple priority event system"""
 
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, Dict, List
+
+from flask import url_for, redirect, flash
 
 event_callbacks = {}
 """All registered event callbacks"""
@@ -32,7 +34,7 @@ def subscribes_to(event: str, priority: int=100) -> Callable:
     return subscribes_impl
 
 
-def publish(event: str, init_arg: Optional[Any]=None, *args, **kwargs) -> Any:
+def publish(event: str, init_arg: Optional[Any]=None, *args, **kwargs) -> Optional[Any]:
     """\
     Publish an event, returning the value as passed through all subscribed
     callbacks.
