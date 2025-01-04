@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["version"]
+name = "bc_fsf_users"
+dependencies = [
+    "tabulate",
+    "pyotp",
+    "wtforms",
+    "flask-wtf",
+    "pytz",
+    "qrcode"
+]
+requires-python = ">= 3.8"
+description = "Add user login functionality"
+readme = "README.md"
+
+[project.optional-dependencies]
+test = [
+    "bc_fsf_base @ git+https://basementcat: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@github.com/BasementCat/flask-site-framework.git#subdirectory=base",
+    "bc_fsf_database @ git+https://basementcat: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@github.com/BasementCat/flask-site-framework.git#subdirectory=database"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["**/*.j2"]
