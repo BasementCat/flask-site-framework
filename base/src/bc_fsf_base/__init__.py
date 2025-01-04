@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 DECORATORS = {}
 """All defined decorators"""
 
-def decorator(name: str, *dec_args, **dec_kwargs) -> Callable:
+def decorator(name: str, *dec_args, require=False, **dec_kwargs) -> Callable:
     """\
     Apply a decorator to a function call.
 
@@ -38,15 +38,29 @@ def decorator(name: str, *dec_args, **dec_kwargs) -> Callable:
     args/kwargs the function is called with, and the callback to call.  The
     decorator must determine whether to call the callback or not, and may return
     some other value.
+
+    If require=True, an exception is raised if the requested decorator is not
+    available; this is useful for access control decorators where exposing a
+    view would be less than ideal.  The exception is not an http response; it is
+    meant to crash the application & be fixed
     """
     def decorator_impl(callback: Callable) -> Callable:
         @functools.wraps(callback)
         def decorator_wrap(*call_args, **call_kwargs):
             if name in DECORATORS:
                 return DECORATORS[name](callback, dec_args=dec_args, dec_kwargs=dec_kwargs, call_args=call_args, call_kwargs=call_kwargs)
+            elif require:
+                raise ValueError(f"The required decorator {name} is not available")
             return callback(*call_args, **call_kwargs)
         return decorator_wrap
     return decorator_impl
+
+
+def require(name: str, *dec_args, **dec_kwargs) -> Callable:
+    """\
+    Same as calling decorator() with require=True
+    """
+    return decorator(name, *dec_args, require=True, **dec_kwargs)
 
 
 class Plugin(jinja.PerPlugin):
