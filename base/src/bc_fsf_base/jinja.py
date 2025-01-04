@@ -125,6 +125,27 @@ def now() -> arrow.arrow.Arrow:
     return arrow.utcnow()
 
 
+@jinja_filter()
+def dt(dt: arrow.arrow.Arrow, part: str='all', fmt='full') -> str:
+    """\
+    Format an Arrow datetime using either the site timezone or one defined by
+    an event
+    """
+    formats = {
+        'full': ('MMMM Do, YYYY', 'h:mm A'),
+    }
+    tz = event.publish('jinja.dt.timezone', current_app.config['SITE_TIMEZONE'])
+    if fmt in formats:
+        df, tf = formats[fmt]
+        if part == 'date':
+            fmt = df
+        elif part == 'time':
+            fmt = tf
+        else:
+            fmt = f'{df} {tf}'
+    return dt.to(tz).format(fmt)
+
+
 @jinja_global()
 def maybe_call(fn: str, *args, **kwargs) -> Any:
     """\
