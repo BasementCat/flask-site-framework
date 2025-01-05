@@ -73,19 +73,16 @@ def login():
     return render_template('user/login.html.j2', form=form)
 
 
-@bp.route('/login', methods=['GET', 'POST'])
+@bp.route('/login/totp', methods=['GET', 'POST'])
 @require('user.load', current=True)
 @require('user.can', 'login', always_abort=True, obj_key='user', skip_totp_setup=True)
 def totp_login(user, *args, **kwargs):
     if not (current_app.config['USERS_ALLOW_TOTP'] and user.totp_secret):
         return redir_after_login()
-    form = TOTPValidationForm()
+    form = TOTPValidationForm(user)
     if form.validate_on_submit():
-        if user.validate_totp(form.code.data):
-            session['totp_login'] = True
-            return redir_after_login()
-        else:
-            flash("Invalid code", 'danger')
+        session['totp_login'] = True
+        return redir_after_login()
 
     return render_template('user/totp_login.html.j2', form=form)
 
@@ -165,7 +162,7 @@ def totp_setup(user, *args, **kwargs):
     if not current_app.config['USERS_ALLOW_TOTP']:
         abort(404)
 
-    form = TOTPValidationForm()
+    form = TOTPValidationForm(setup=True)
     if form.validate_on_submit():
         try:
             user.complete_totp_setup(form.code.data)

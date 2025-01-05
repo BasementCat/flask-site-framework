@@ -71,8 +71,15 @@ def mock_user_view(*permissions, upd_config=None, has_user=False, has_curuser=Fa
     def mock_user_view_dec(callback):
         @functools.wraps(callback)
         def mock_user_view_wrap(*args, **kwargs):
-            user = MagicMock() if has_user else None
-            curuser = MagicMock if has_curuser else None
+            def mk_user(val):
+                if val is False:
+                    return None
+                elif val is True:
+                    return MagicMock()
+                else:
+                    return MagicMock(**val)
+            user = mk_user(has_user)
+            curuser = mk_user(has_curuser)
             with mock_user_cb(view, *permissions, user=user, curuser=curuser) as testview:
                 config = {
                     'SECRET_KEY': 'ljsdflk',
@@ -396,7 +403,6 @@ class TestView__Signup(TestCase):
         ])
 
 
-
 class TestView__Login(TestCase):
     @mock_user_view('login')
     @patch('bc_fsf_user.view.event')
@@ -449,24 +455,101 @@ class TestView__Login(TestCase):
         mock_redir_login.assert_called_once_with()
         self.assertEqual(res.data, b'foobar')
 
-# class TestView__TOTPLogin(TestCase):
-#     pass
 
-# # @bp.route('/login', methods=['GET', 'POST'])
-# # @require('user.load', current=True)
-# # @require('user.can', 'login', always_abort=True, obj_key='user', skip_totp_setup=True)
-# # def totp_login(user, *args, **kwargs):
-# #     if not (current_app.config['USERS_ALLOW_TOTP'] and user.totp_secret):
-# #         return redir_after_login()
-# #     form = TOTPValidationForm()
-# #     if form.validate_on_submit():
-# #         if user.validate_totp(form.code.data):
-# #             session['totp_login'] = True
-# #             return redir_after_login()
-# #         else:
-# #             flash("Invalid code", 'danger')
+class TestView__TOTPLogin(TestCase):
+    @mock_user_view('login', upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_get__no_user(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        with client:
+            res = client.get('/login/totp')
+            self.assertEqual(res.status_code, 404)
+            self.assertFalse(session.get('totp_login'))
 
-# #     return render_template('user/totp_login.html.j2', form=form)
+    @mock_user_view('login', has_curuser={'totp_secret': 'foobar', 'validate_totp': lambda c: c == '123456'}, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_get(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        with client:
+            res = client.get('/login/totp')
+            self.assertIn(b'TOTP Login', res.data)
+
+    @mock_user_view(has_curuser={'totp_secret': 'foobar', 'validate_totp': lambda c: c == '123456'}, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_no_perm(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        with client:
+            res = client.get('/login/totp')
+            self.assertEqual(res.status_code, 401)
+            self.assertFalse(session.get('totp_login'))
+
+    @mock_user_view('login', has_curuser={'totp_secret': 'foobar', 'validate_totp': lambda c: c == '123456'}, upd_config={'USERS_ALLOW_TOTP': False})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_disabled(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        with client:
+            mock_redir_login.return_value = 'foobar'
+            res = client.get('/login/totp')
+            mock_redir_login.assert_called_once_with()
+            self.assertEqual(res.data, b'foobar')
+            self.assertFalse(session.get('totp_login'))
+
+    @mock_user_view('login', has_curuser={'totp_secret': None, 'validate_totp': lambda c: c == '123456'}, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_no_secret(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        with client:
+            mock_redir_login.return_value = 'foobar'
+            res = client.get('/login/totp')
+            mock_redir_login.assert_called_once_with()
+            self.assertEqual(res.data, b'foobar')
+            self.assertFalse(session.get('totp_login'))
+
+    @mock_user_view('login', has_curuser={'totp_secret': 'foobar', 'validate_totp': lambda c: c == '123456'}, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_no_data(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        with client:
+            res = client.post('/login/totp', data={})
+            self.assertIn(b'field is required', res.data)
+            self.assertFalse(session.get('totp_login'))
+
+    @mock_user_view('login', has_curuser={'totp_secret': 'foobar', 'validate_totp': lambda c: c == '123456'}, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_invalid_data(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        with client:
+            res = client.post('/login/totp', data={'code': '112233'})
+            self.assertIn(b'Invalid code', res.data)
+            self.assertFalse(session.get('totp_login'))
+
+    @mock_user_view('login', has_curuser={'totp_secret': 'foobar', 'validate_totp': lambda c: c == '123456'}, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.event')
+    @patch('bc_fsf_user.view.redir_after_login')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    def test_success(self, mock_user_cls, mock_flash, mock_redir_login, mock_event, app, client, user, curuser):
+        with client:
+            mock_redir_login.return_value = 'foobar'
+            res = client.post('/login/totp', data={'code': '123456'})
+            mock_redir_login.assert_called_once_with()
+            self.assertEqual(res.data, b'foobar')
+            self.assertTrue(session.get('totp_login'))
+
 
 # class TestView__Edit(TestCase):
 #     pass
