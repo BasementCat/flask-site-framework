@@ -139,31 +139,47 @@ class TestLoginForm(TestCase):
 
 
 @patch('bc_fsf_user.forms.totp')
-class TestTOTPValidationForm(TestCase):
+class TestTOTPValidationForm__Setup(TestCase):
     def test_validate_code__not_inprogress(self, mock_totp):
         mock_totp.complete_totp_setup.side_effect = exc.ProcessNotInProgress('foo')
-        user = MockUser()
+        user = MockUser(validate_totp=lambda c: c == '123456')
         with mock_app({'SECRET_KEY': 'alsdkfj', 'WTF_CSRF_ENABLED': False}) as app, app.test_request_context('/test', method="POST", data={'code': '123456'}):
-            form = forms.TOTPValidationForm(user=user)
+            form = forms.TOTPValidationForm(user=user, setup=True)
             with self.assertRaisesRegex(ValidationError, 'foo'):
                 res = form.validate_code(form.code)
             mock_totp.complete_totp_setup.assert_called_once_with(user, '123456')
 
     def test_validate_code__invalid_code(self, mock_totp):
         mock_totp.complete_totp_setup.side_effect = exc.InvalidCode('bar')
-        user = MockUser()
+        user = MockUser(validate_totp=lambda c: c == '123456')
         with mock_app({'SECRET_KEY': 'alsdkfj', 'WTF_CSRF_ENABLED': False}) as app, app.test_request_context('/test', method="POST", data={'code': '123456'}):
-            form = forms.TOTPValidationForm(user=user)
+            form = forms.TOTPValidationForm(user=user, setup=True)
             with self.assertRaisesRegex(ValidationError, 'bar'):
                 res = form.validate_code(form.code)
             mock_totp.complete_totp_setup.assert_called_once_with(user, '123456')
 
     def test_validate_code(self, mock_totp):
-        user = MockUser()
+        user = MockUser(validate_totp=lambda c: c == '123456')
+        with mock_app({'SECRET_KEY': 'alsdkfj', 'WTF_CSRF_ENABLED': False}) as app, app.test_request_context('/test', method="POST", data={'code': '123456'}):
+            form = forms.TOTPValidationForm(user=user, setup=True)
+            res = form.validate_code(form.code)
+            mock_totp.complete_totp_setup.assert_called_once_with(user, '123456')
+
+
+class TestTOTPValidationForm__Login(TestCase):
+    def test_validate_code__invalid_code(self):
+        user = MockUser(validate_totp=lambda c: c == '123456')
+        with mock_app({'SECRET_KEY': 'alsdkfj', 'WTF_CSRF_ENABLED': False}) as app, app.test_request_context('/test', method="POST", data={'code': '112233'}):
+            form = forms.TOTPValidationForm(user=user)
+            with self.assertRaisesRegex(ValidationError, 'Invalid code'):
+                res = form.validate_code(form.code)
+
+    def test_validate_code(self):
+        user = MockUser(validate_totp=lambda c: c == '123456')
         with mock_app({'SECRET_KEY': 'alsdkfj', 'WTF_CSRF_ENABLED': False}) as app, app.test_request_context('/test', method="POST", data={'code': '123456'}):
             form = forms.TOTPValidationForm(user=user)
             res = form.validate_code(form.code)
-            mock_totp.complete_totp_setup.assert_called_once_with(user, '123456')
+            self.assertIsNone(res)
 
 
 class TestUserForm(TestCase):
