@@ -10,7 +10,7 @@ from bc_fsf_base import require, event
 from bc_fsf_database import db
 from .models import User
 from .forms import LoginForm, PasswordResetInitForm, PasswordResetForm, TOTPValidationForm, UserForm
-from .process import exc
+from .process import exc, email
 
 
 bp = Blueprint('user', __name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
@@ -109,13 +109,13 @@ def edit(user, *args, **kwargs):
 @bp.get('/confirm-email/<any(confirm,deny):action>/<code>')
 def confirm_email(action, code):
     try:
-        res = User.complete_email_confirmation(code, confirm=(action == 'confirm'))
+        res = email.complete_email_confirmation(code, confirm=(action == 'confirm'))
         if res:
             flash("Your email address is confirmed and you may now log in.", 'success')
         else:
             flash("Your email address change has been cancelled", 'info')
         return redirect(url_for('.login'))
-    except RuntimeError as e:
+    except (exc.InvalidCode, exc.ProcessInProgress) as e:
         abort(400, str(e))
 
 

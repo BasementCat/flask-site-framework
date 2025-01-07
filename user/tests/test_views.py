@@ -833,20 +833,50 @@ class TestView__Edit(TestCase):
             mock_begin_email_conf.assert_called_once_with(user, 'test email')
 
 
-# class TestView__ConfirmEmail(TestCase):
-#     pass
+class TestView__ConfirmEmail(TestCase):
+    @mock_user_view()
+    @patch('bc_fsf_user.view.email')
+    @patch('bc_fsf_user.view.flash')
+    def test_invalid_code(self, mock_flash, mock_email, client, **kwargs):
+        mock_email.complete_email_confirmation.side_effect = exc.InvalidCode('err')
+        res = client.get('/confirm-email/confirm/code')
+        mock_email.complete_email_confirmation.assert_called_once_with('code', confirm=True)
+        mock_flash.assert_not_called()
+        self.assertEqual(res.status_code, 400)
+        self.assertIn(b'err', res.data)
 
-# # @bp.get('/confirm-email/<any(confirm,deny):action>/<code>')
-# # def confirm_email(action, code):
-# #     try:
-# #         res = User.complete_email_confirmation(code, confirm=(action == 'confirm'))
-# #         if res:
-# #             flash("Your email address is confirmed and you may now log in.", 'success')
-# #         else:
-# #             flash("Your email address change has been cancelled", 'info')
-# #         return redirect(url_for('.login'))
-# #     except RuntimeError as e:
-# #         abort(400, str(e))
+    @mock_user_view()
+    @patch('bc_fsf_user.view.email')
+    @patch('bc_fsf_user.view.flash')
+    def test_inprogress(self, mock_flash, mock_email, client, **kwargs):
+        mock_email.complete_email_confirmation.side_effect = exc.ProcessInProgress('err')
+        res = client.get('/confirm-email/confirm/code')
+        mock_email.complete_email_confirmation.assert_called_once_with('code', confirm=True)
+        mock_flash.assert_not_called()
+        self.assertEqual(res.status_code, 400)
+        self.assertIn(b'err', res.data)
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.email')
+    @patch('bc_fsf_user.view.flash')
+    def test_confirm(self, mock_flash, mock_email, client, **kwargs):
+        mock_email.complete_email_confirmation.return_value = True
+        res = client.get('/confirm-email/confirm/code')
+        mock_email.complete_email_confirmation.assert_called_once_with('code', confirm=True)
+        mock_flash.assert_called_once_with("Your email address is confirmed and you may now log in.", 'success')
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.headers['Location'], '/login')
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.email')
+    @patch('bc_fsf_user.view.flash')
+    def test_deny(self, mock_flash, mock_email, client, **kwargs):
+        mock_email.complete_email_confirmation.return_value = False
+        res = client.get('/confirm-email/confirm/code')
+        mock_email.complete_email_confirmation.assert_called_once_with('code', confirm=True)
+        mock_flash.assert_called_once_with("Your email address change has been cancelled", 'info')
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.headers['Location'], '/login')
 
 # class TestView__ResetPassword(TestCase):
 #     pass
