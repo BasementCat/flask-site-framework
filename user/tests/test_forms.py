@@ -449,7 +449,8 @@ class TestUserForm(TestCase):
                 form.populate_obj(mock_user)
 
     @patch('bc_fsf_user.forms.event')
-    def test_populate__edit__self(self, mock_event):
+    @patch('bc_fsf_user.forms.email')
+    def test_populate__edit__self(self, mock_email, mock_event):
         mock_curuser = MagicMock(password='bar')
         mock_curuser.can.return_value = False
         mock_event.publish.return_value = mock_curuser
@@ -494,9 +495,10 @@ class TestUserForm(TestCase):
                 app.plugins = {'user': mock_user_plugin}
                 form = forms.UserForm(mock_user, 'edit')
                 form.populate_obj(mock_user)
+                mock_email.begin_email_confirmation.assert_called_once_with(mock_user, 'test email 2')
                 self.assertEqual(mock_user.username, 'test username 1')
                 self.assertEqual(mock_user.email, 'test email 1')
-                self.assertEqual(mock_user.new_email, 'test email 2')
+                self.assertEqual(mock_user.new_email, None)
                 self.assertEqual(mock_user.password, 'test password 2')
                 self.assertEqual(mock_user.name, 'test name 2')
                 self.assertEqual(mock_user.is_approved, True)
@@ -515,7 +517,8 @@ class TestUserForm(TestCase):
                 self.assertEqual(mock_user.timezone, 'test timezone 2')
 
     @patch('bc_fsf_user.forms.event')
-    def test_populate__edit__admin(self, mock_event):
+    @patch('bc_fsf_user.forms.email')
+    def test_populate__edit__admin(self, mock_email, mock_event):
         mock_curuser = MagicMock(password='bar')
         mock_curuser.can.return_value = True
         mock_event.publish.return_value = mock_curuser
@@ -560,9 +563,10 @@ class TestUserForm(TestCase):
                 app.plugins = {'user': mock_user_plugin}
                 form = forms.UserForm(mock_user, 'edit')
                 form.populate_obj(mock_user)
+                mock_email.begin_email_confirmation.assert_called_once_with(mock_user, 'test email 2')
                 self.assertEqual(mock_user.username, 'test username 2')
                 self.assertEqual(mock_user.email, 'test email 1')
-                self.assertEqual(mock_user.new_email, 'test email 2')
+                self.assertEqual(mock_user.new_email, None)
                 self.assertEqual(mock_user.password, 'test password 2')
                 self.assertEqual(mock_user.name, 'test name 2')
                 self.assertEqual(mock_user.is_approved, False)

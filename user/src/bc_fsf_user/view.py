@@ -10,6 +10,7 @@ from bc_fsf_base import require, event
 from bc_fsf_database import db
 from .models import User
 from .forms import LoginForm, PasswordResetInitForm, PasswordResetForm, TOTPValidationForm, UserForm
+from .process import exc
 
 
 bp = Blueprint('user', __name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
@@ -94,10 +95,12 @@ def edit(user, *args, **kwargs):
     # User form assumes current user has at least edit_user (and user is current), or edit_other_user    
     form = UserForm(user, 'edit')
     if form.validate_on_submit():
-        form.populate_obj(user)
+        try:
+            form.populate_obj(user)
+        except (exc.ProcessInProgress, exc.FailedToSendEmail) as e:
+            # catch & flash here as we still want to commit
+            flash(str(e), 'danger')
         db.session.commit()
-        if user.new_email:
-            user.begin_email_confirmation(user.new_email)
         flash("Your changes have been saved", 'success')
 
     return render_template('user/edit.html.j2', form=form, user=user)

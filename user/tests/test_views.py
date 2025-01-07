@@ -8,6 +8,7 @@ from importlib import reload
 from flask import abort, redirect, url_for, session, request
 
 from bc_fsf_user import view
+from bc_fsf_user.process import exc
 from . import mock_app, mock_blueprint, mock_real_app
 
 
@@ -71,15 +72,27 @@ def mock_user_view(*permissions, upd_config=None, has_user=False, has_curuser=Fa
     def mock_user_view_dec(callback):
         @functools.wraps(callback)
         def mock_user_view_wrap(*args, **kwargs):
-            def mk_user(val):
+            def user_can(*perms, **kwargs):
+                for p in perms:
+                    if p in permissions:
+                        return True
+                return False
+            def mk_user(val, with_perms=False):
                 if val is False:
                     return None
-                elif val is True:
-                    return MagicMock()
                 else:
+                    if val is True:
+                        val = {}
+                    val.update({
+                        'update_password': None,
+                        'update_repassword': None,
+                        'old_password': None,
+                    })
+                    if with_perms:
+                        val['can'] = user_can
                     return MagicMock(**val)
             user = mk_user(has_user)
-            curuser = mk_user(has_curuser)
+            curuser = mk_user(has_curuser, with_perms=True)
             with mock_user_cb(view, *permissions, user=user, curuser=curuser) as testview:
                 config = {
                     'SECRET_KEY': 'ljsdflk',
@@ -91,7 +104,18 @@ def mock_user_view(*permissions, upd_config=None, has_user=False, has_curuser=Fa
                 }
                 config.update(upd_config or {})
                 with mock_real_app(config) as app:
-                    app.plugins = {'user': MagicMock}
+                    app.plugins = {
+                        'user': MagicMock(
+                            permissions={
+                                'orig perms': {'name': 'orig perms'},
+                                'test perms': {'name': 'test perms'},
+                            },
+                            roles={
+                                'orig roles': {'name': 'orig roles'},
+                                'test roles': {'name': 'test roles'},
+                            },
+                        )
+                    }
                     with mock_blueprint(app, testview.bp) as client:
                         return callback(*args, app=app, client=client, user=user, curuser=curuser, **kwargs)
         return mock_user_view_wrap
@@ -551,23 +575,263 @@ class TestView__TOTPLogin(TestCase):
             self.assertTrue(session.get('totp_login'))
 
 
-# class TestView__Edit(TestCase):
-#     pass
+class TestView__Edit(TestCase):
+    @mock_user_view(has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 1})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_get__no_perm(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        res = client.get('/edit/9999')
+        self.assertEqual(res.status_code, 401)
+        mock_flash.assert_not_called()
+        mock_db.session.commit.assert_not_called()
 
-# # @bp.route('/edit/<int:user_id>', methods=['GET', 'POST'])
-# # @require('user.load')
-# # @require('user.can', 'edit_user', 'edit_other_user', 'edit_user_admin', 'edit_other_user_admin', obj_key='user')
-# # def edit(user, *args, **kwargs):
-# #     # User form assumes current user has at least edit_user (and user is current), or edit_other_user    
-# #     form = UserForm(user, 'edit')
-# #     if form.validate_on_submit():
-# #         form.populate_obj(user)
-# #         db.session.commit()
-# #         if user.new_email:
-# #             user.begin_email_confirmation(user.new_email)
-# #         flash("Your changes have been saved", 'success')
+    @mock_user_view('edit_user', has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 2})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_get__perm(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        res = client.get('/edit/9999')
+        self.assertEqual(res.status_code, 200)
+        mock_flash.assert_not_called()
+        mock_db.session.commit.assert_not_called()
 
-# #     return render_template('user/edit.html.j2', form=form, user=user)
+    @mock_user_view('edit_user', has_user={'id': 1, 'username': 'orig username', 'email': 'orig email', 'new_email': None, 'password': 'orig password', 'bio': 'orig bio', 'timezone': 'America/Chicago', 'is_approved': True, 'is_disabled': None, 'roles': ['orig roles'], 'permissions': ['orig perms']})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_edit__base__no_curuser(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        data = {
+            'username': 'test username',
+            'email': 'orig email',
+            'old_password': 'orig password',
+            'bio': 'test bio',
+            'timezone': 'America/Denver',
+            'is_approved': False,
+            'is_disabled': 'test is_disabled',
+            'roles': ['test roles'],
+            'permissions': ['test perms'],
+        }
+        res = client.post('/edit/9999', data=data)
+        self.assertEqual(res.status_code, 200)
+        mock_flash.assert_not_called()
+        mock_db.session.commit.assert_not_called()
+        self.assertIn(b'user is logged in', res.data)
+        self.assertEqual(user.username, 'orig username')
+        self.assertEqual(user.email, 'orig email')
+        self.assertEqual(user.new_email, None)
+        self.assertEqual(user.password, 'orig password')
+        self.assertEqual(user.bio, 'orig bio')
+        self.assertEqual(user.timezone, 'America/Chicago')
+        self.assertEqual(user.is_approved, True)
+        self.assertEqual(user.is_disabled, None)
+        self.assertEqual(user.roles, ['orig roles'])
+        self.assertEqual(user.permissions, ['orig perms'])
+
+    @mock_user_view('edit_user', has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 1, 'username': 'orig username', 'email': 'orig email', 'new_email': None, 'password': 'orig password', 'bio': 'orig bio', 'timezone': 'America/Chicago', 'is_approved': True, 'is_disabled': None, 'roles': ['orig roles'], 'permissions': ['orig perms']})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_edit__base__missing_fields(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        mock_user_cls.query.filter().filter().count.return_value = 0
+        data = {
+            'username': 'test username',
+            'bio': 'test bio',
+            'is_approved': False,
+            'is_disabled': 'test is_disabled',
+            'roles': ['test roles'],
+            'permissions': ['test perms'],
+            'email': '',
+            'timezone': '',
+        }
+        res = client.post('/edit/9999', data=data)
+        self.assertEqual(res.status_code, 200)
+        mock_flash.assert_not_called()
+        mock_db.session.commit.assert_not_called()
+        self.assertIn(b'field is required', res.data)
+        self.assertEqual(user.username, 'orig username')
+        self.assertEqual(user.email, 'orig email')
+        self.assertEqual(user.new_email, None)
+        self.assertEqual(user.password, 'orig password')
+        self.assertEqual(user.bio, 'orig bio')
+        self.assertEqual(user.timezone, 'America/Chicago')
+        self.assertEqual(user.is_approved, True)
+        self.assertEqual(user.is_disabled, None)
+        self.assertEqual(user.roles, ['orig roles'])
+        self.assertEqual(user.permissions, ['orig perms'])
+
+    @mock_user_view('edit_user', has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 1, 'username': 'orig username', 'email': 'orig email', 'new_email': None, 'password': 'orig password', 'bio': 'orig bio', 'timezone': 'America/Chicago', 'is_approved': True, 'is_disabled': None, 'roles': ['orig roles'], 'permissions': ['orig perms']})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_edit__base(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        mock_user_cls.query.filter().filter().count.return_value = 0
+        data = {
+            'username': 'test username',
+            'email': 'orig email',
+            'old_password': 'orig password',
+            'bio': 'test bio',
+            'timezone': 'America/Denver',
+            'is_approved': False,
+            'is_disabled': 'test is_disabled',
+            'roles': ['test roles'],
+            'permissions': ['test perms'],
+        }
+        res = client.post('/edit/9999', data=data)
+        self.assertEqual(res.status_code, 200)
+        mock_flash.assert_called_once_with("Your changes have been saved", 'success')
+        mock_db.session.commit.assert_called_once_with()
+        self.assertNotIn(b'field is required', res.data)
+        self.assertEqual(user.username, 'orig username')
+        self.assertEqual(user.email, 'orig email')
+        self.assertEqual(user.new_email, None)
+        self.assertEqual(user.password, 'orig password')
+        self.assertEqual(user.bio, 'test bio')
+        self.assertEqual(user.timezone, 'America/Denver')
+        self.assertEqual(user.is_approved, True)
+        self.assertEqual(user.is_disabled, None)
+        self.assertEqual(user.roles, ['orig roles'])
+        self.assertEqual(user.permissions, ['orig perms'])
+
+    @mock_user_view('edit_user', 'edit_user_admin', has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 1, 'username': 'orig username', 'email': 'orig email', 'new_email': None, 'password': 'orig password', 'bio': 'orig bio', 'timezone': 'America/Chicago', 'is_approved': True, 'is_disabled': None, 'roles': ['orig roles'], 'permissions': ['orig perms']})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_edit__admin__perm(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        mock_user_cls.query.filter().filter().count.return_value = 0
+        data = {
+            'username': 'test username',
+            'email': 'orig email',
+            'old_password': 'orig password',
+            'bio': 'test bio',
+            'timezone': 'America/Denver',
+            'is_approved': '',
+            'is_disabled': 'test is_disabled',
+            'roles': ['test roles'],
+            'permissions': ['test perms'],
+        }
+        res = client.post('/edit/9999', data=data)
+        self.assertEqual(res.status_code, 200)
+        mock_flash.assert_called_once_with("Your changes have been saved", 'success')
+        mock_db.session.commit.assert_called_once_with()
+        self.assertNotIn(b'field is required', res.data)
+        self.assertEqual(user.username, 'test username')
+        self.assertEqual(user.email, 'orig email')
+        self.assertEqual(user.new_email, None)
+        self.assertEqual(user.password, 'orig password')
+        self.assertEqual(user.bio, 'test bio')
+        self.assertEqual(user.timezone, 'America/Denver')
+        self.assertEqual(user.is_approved, False)
+        self.assertEqual(user.is_disabled, 'test is_disabled')
+        self.assertEqual(user.roles, ['test roles'])
+        self.assertEqual(user.permissions, ['test perms'])
+
+    @mock_user_view('edit_user', has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 1, 'username': 'orig username', 'email': 'orig email', 'new_email': None, 'password': 'orig password', 'bio': 'orig bio', 'timezone': 'America/Chicago', 'is_approved': True, 'is_disabled': None, 'roles': ['orig roles'], 'permissions': ['orig perms']})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_edit__password(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        mock_user_cls.query.filter().filter().count.return_value = 0
+        data = {
+            'old_password': 'orig password',
+            'update_password': 'test password',
+            'update_repassword': 'test password',
+        }
+        res = client.post('/edit/9999', data=data)
+        self.assertEqual(res.status_code, 200)
+        mock_flash.assert_called_once_with("Your changes have been saved", 'success')
+        mock_db.session.commit.assert_called_once_with()
+        self.assertNotIn(b'field is required', res.data)
+        self.assertEqual(user.password, 'test password')
+
+    @mock_user_view('edit_user', has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 1, 'username': 'orig username', 'email': 'orig email', 'new_email': None, 'password': 'orig password', 'bio': 'orig bio', 'timezone': 'America/Chicago', 'is_approved': True, 'is_disabled': None, 'roles': ['orig roles'], 'permissions': ['orig perms']})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_edit__new_email(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        mock_user_cls.query.filter().filter().count.return_value = 0
+        data = {
+            'old_password': 'orig password',
+            'email': 'test email',
+        }
+        with patch('bc_fsf_user.forms.email.begin_email_confirmation') as mock_begin_email_conf:
+            res = client.post('/edit/9999', data=data)
+            self.assertEqual(res.status_code, 200)
+            mock_flash.assert_called_once_with("Your changes have been saved", 'success')
+            mock_db.session.commit.assert_called_once_with()
+            self.assertNotIn(b'field is required', res.data)
+            self.assertEqual(user.email, 'orig email')
+            self.assertEqual(user.new_email, None)
+            mock_begin_email_conf.assert_called_once_with(user, 'test email')
+
+    @mock_user_view('edit_user', has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 1, 'username': 'orig username', 'email': 'orig email', 'new_email': None, 'password': 'orig password', 'bio': 'orig bio', 'timezone': 'America/Chicago', 'is_approved': True, 'is_disabled': None, 'roles': ['orig roles'], 'permissions': ['orig perms']})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_edit__new_email__fail__inprogress(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        mock_user_cls.query.filter().filter().count.return_value = 0
+        data = {
+            'old_password': 'orig password',
+            'email': 'test email',
+        }
+        with patch('bc_fsf_user.forms.email.begin_email_confirmation') as mock_begin_email_conf:
+            mock_begin_email_conf.side_effect = exc.ProcessInProgress('foobar')
+            res = client.post('/edit/9999', data=data)
+            self.assertEqual(res.status_code, 200)
+            mock_flash.assert_has_calls([
+                call("foobar", 'danger'),
+                call("Your changes have been saved", 'success'),
+            ])
+            mock_db.session.commit.assert_called_once_with()
+            self.assertNotIn(b'field is required', res.data)
+            self.assertEqual(user.email, 'orig email')
+            self.assertEqual(user.new_email, None)
+            mock_begin_email_conf.assert_called_once_with(user, 'test email')
+
+    @mock_user_view('edit_user', has_curuser={'id': 1, 'password': 'orig password'}, has_user={'id': 1, 'username': 'orig username', 'email': 'orig email', 'new_email': None, 'password': 'orig password', 'bio': 'orig bio', 'timezone': 'America/Chicago', 'is_approved': True, 'is_disabled': None, 'roles': ['orig roles'], 'permissions': ['orig perms']})
+    @patch('bc_fsf_user.view.db')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.forms.User')
+    @patch('bc_fsf_user.forms.event')
+    def test_edit__new_email__fail__failedtosend(self, mock_event, mock_user_cls, mock_flash, mock_db, app, client, user, curuser):
+        mock_event.publish.return_value = curuser
+        mock_user_cls.query.filter().filter().count.return_value = 0
+        data = {
+            'old_password': 'orig password',
+            'email': 'test email',
+        }
+        with patch('bc_fsf_user.forms.email.begin_email_confirmation') as mock_begin_email_conf:
+            mock_begin_email_conf.side_effect = exc.FailedToSendEmail('foobar')
+            res = client.post('/edit/9999', data=data)
+            self.assertEqual(res.status_code, 200)
+            mock_flash.assert_has_calls([
+                call("foobar", 'danger'),
+                call("Your changes have been saved", 'success'),
+            ])
+            mock_db.session.commit.assert_called_once_with()
+            self.assertNotIn(b'field is required', res.data)
+            self.assertEqual(user.email, 'orig email')
+            self.assertEqual(user.new_email, None)
+            mock_begin_email_conf.assert_called_once_with(user, 'test email')
+
 
 # class TestView__ConfirmEmail(TestCase):
 #     pass

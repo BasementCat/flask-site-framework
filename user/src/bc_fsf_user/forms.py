@@ -11,7 +11,7 @@ from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
 from bc_fsf_base import event
 from .models import User
-from .process import exc, totp
+from .process import exc, totp, email
 
 
 logger = logging.getLogger(__name__)
@@ -157,11 +157,12 @@ def UserForm(user: OptionalType[User], action: str):
             if action == 'signup':
                 raise RuntimeError("Cannot use populate_obj for signup")
             super().populate_obj(obj)
-            # email has been set - if it differs from current email, then we need to potentially begin the reset process
-            if self.email.data != original_email:
-                obj.new_email = self.email.data
-                obj.email = original_email
+            # update password first
             if self.update_password.data:
                 obj.password = self.update_password.data
+            # If email has changed, begin the email confirmation process
+            if self.email.data != original_email:
+                obj.email = original_email
+                email.begin_email_confirmation(obj, self.email.data)
 
     return UserEditForm(obj=user)
