@@ -10,7 +10,7 @@ from bc_fsf_base import require, event
 from bc_fsf_database import db
 from .models import User
 from .forms import LoginForm, PasswordResetInitForm, PasswordResetForm, TOTPValidationForm, UserForm
-from .process import exc, email
+from .process import exc, email, password
 
 
 bp = Blueprint('user', __name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
@@ -120,42 +120,43 @@ def confirm_email(action, code):
 
 
 @bp.route('/reset-password', methods=['GET', 'POST'])
-@bp.route('/reset-password/<any(confirm,deny):any>/<code>', methods=['GET', 'POST'])
+@bp.route('/reset-password/<any(confirm,deny):action>/<code>', methods=['GET', 'POST'])
 def reset_password(action=None, code=None):
-    try:
-        if action:
-            form = PasswordResetForm()
-            if form.validate_on_submit():
-                user, status = User.check_complete_password_reset(code, confirm=(action == 'confirm'))
-                if not status:
-                    abort(400, "Password reset cannot be completed")
-                user.complete_password_reset(form.password.data)
-                flash("Your password has been reset and you may now log in.", 'success')
-                return redirect(url_for('.login'))
-
-            user, status = User.check_complete_password_reset(code, confirm=(action == 'confirm'))
-            if not status:
+    if action:
+        try:
+            user, status = password.check_complete_password_reset(code, confirm=(action == 'confirm'))
+            if status:
+                form = PasswordResetForm()
+                if form.validate_on_submit():
+                    password.complete_password_reset(user, form.password.data)
+                    flash("Your password has been reset and you may now log in.", 'success')
+                    return redirect(url_for('.login'))
+            else:
                 flash("Your password reset has been cancelled", 'info')
                 return redirect(url_for('.login'))
+        except exc.InvalidCode as e:
+            abort(400, str(e))
+    else:
+        form = PasswordResetInitForm()
+        if form.validate_on_submit():
+            user = None
+            try:
+                user = User.query.filter(User.username.like(form.username_or_email.data) | User.email.like(form.username_or_email.data)).one()
+            except NoResultFound:
+                pass
+            except MultipleResultsFound:
+                logger.error("Multiple users found for %s", form.username_or_email.data)
 
-        else:
-            form = PasswordResetInitForm()
-            if form.validate_on_submit():
-                user = None
+            if user:
                 try:
-                    user = User.query.filter(User.username.like(form.username_or_email.data) | User.emaijl.like(form.username_or_email.data)).one()
-                except NoResultFound:
-                    pass
-                except MultipleResultsFound:
-                    logger.error("Multiple users found for %s", form.username_or_email.data)
-                if user:
-                    user.begin_password_reset()
+                    password.begin_password_reset(user)
                     return redirect(url_for('.login'))
-                flash("No matching user was found", 'danger')
+                except exc.FailedToSendEmail as e:
+                    abort(400, str(e))
 
-        return render_template('user/reset_password.html.j2', action=action or 'init', form=form)
-    except RuntimeError as e:
-        abort(400, str(e))
+            flash("No matching user was found", 'danger')
+
+    return render_template('user/reset_password.html.j2', action=action or 'init', form=form)
 
 
 @bp.route('/edit/<int:user_id>/totp', methods=['GET', 'POST'])

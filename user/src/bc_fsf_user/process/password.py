@@ -37,7 +37,7 @@ def begin_password_reset(user: User):
             ) \
             .send_message()
     except:
-        raise exc.FailedToSendEmail("Failed to send password reset email")
+        raise exc.FailedToSendEmail("Failed to send password reset email, please try again later")
 
 
 def check_complete_password_reset(code: str, confirm: bool=True) -> bool:

@@ -6,6 +6,7 @@ import functools
 from importlib import reload
 
 from flask import abort, redirect, url_for, session, request
+from sqlalchemy import exc as sql_exc
 
 from bc_fsf_user import view
 from bc_fsf_user.process import exc
@@ -878,46 +879,188 @@ class TestView__ConfirmEmail(TestCase):
         self.assertEqual(res.status_code, 302)
         self.assertEqual(res.headers['Location'], '/login')
 
-# class TestView__ResetPassword(TestCase):
-#     pass
 
-# # @bp.route('/reset-password', methods=['GET', 'POST'])
-# # @bp.route('/reset-password/<any(confirm,deny):any>/<code>', methods=['GET', 'POST'])
-# # def reset_password(action=None, code=None):
-# #     try:
-# #         if action:
-# #             form = PasswordResetForm()
-# #             if form.validate_on_submit():
-# #                 user, status = User.check_complete_password_reset(code, confirm=(action == 'confirm'))
-# #                 if not status:
-# #                     abort(400, "Password reset cannot be completed")
-# #                 user.complete_password_reset(form.password.data)
-# #                 flash("Your password has been reset and you may now log in.", 'success')
-# #                 return redirect(url_for('.login'))
+class TestView__ResetPassword(TestCase):
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_begin(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        res = client.get('/reset-password')
+        mock_logger.error.assert_not_called()
+        mock_user_cls.query.filter.assert_not_called()
+        mock_flash.assert_not_called()
+        mock_pw_proc.check_complete_password_reset.assert_not_called()
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_not_called()
+        self.assertIn(b'Reset Password', res.data)
 
-# #             user, status = User.check_complete_password_reset(code, confirm=(action == 'confirm'))
-# #             if not status:
-# #                 flash("Your password reset has been cancelled", 'info')
-# #                 return redirect(url_for('.login'))
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_begin_missing_data(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        res = client.post('/reset-password', data={})
+        mock_logger.error.assert_not_called()
+        mock_user_cls.query.filter.assert_not_called()
+        mock_flash.assert_not_called()
+        mock_pw_proc.check_complete_password_reset.assert_not_called()
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_not_called()
+        self.assertIn(b'field is required', res.data)
 
-# #         else:
-# #             form = PasswordResetInitForm()
-# #             if form.validate_on_submit():
-# #                 user = None
-# #                 try:
-# #                     user = User.query.filter(User.username.like(form.username_or_email.data) | User.emaijl.like(form.username_or_email.data)).one()
-# #                 except NoResultFound:
-# #                     pass
-# #                 except MultipleResultsFound:
-# #                     logger.error("Multiple users found for %s", form.username_or_email.data)
-# #                 if user:
-# #                     user.begin_password_reset()
-# #                     return redirect(url_for('.login'))
-# #                 flash("No matching user was found", 'danger')
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_begin_no_user(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_user_cls.query.filter().one.side_effect = sql_exc.NoResultFound
+        res = client.post('/reset-password', data={'username_or_email': 'foobar'})
+        mock_logger.error.assert_not_called()
+        mock_user_cls.query.filter.assert_has_calls([
+            call(),
+            call(mock_user_cls.username.like().__or__()),
+        ])
+        mock_user_cls.query.filter().one.assert_called_once_with()
+        mock_flash.assert_called_once_with("No matching user was found", 'danger')
+        mock_pw_proc.check_complete_password_reset.assert_not_called()
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_not_called()
 
-# #         return render_template('user/reset_password.html.j2', action=action or 'init', form=form)
-# #     except RuntimeError as e:
-# #         abort(400, str(e))
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_begin_multiple_users(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_user_cls.query.filter().one.side_effect = sql_exc.MultipleResultsFound
+        res = client.post('/reset-password', data={'username_or_email': 'foobar'})
+        mock_logger.error.assert_called_once_with("Multiple users found for %s", 'foobar')
+        mock_user_cls.query.filter.assert_has_calls([
+            call(),
+            call(mock_user_cls.username.like().__or__()),
+        ])
+        mock_user_cls.query.filter().one.assert_called_once_with()
+        mock_flash.assert_called_once_with("No matching user was found", 'danger')
+        mock_pw_proc.check_complete_password_reset.assert_not_called()
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_not_called()
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_begin_failed_to_send(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_user = MagicMock()
+        mock_user_cls.query.filter().one.return_value = mock_user
+        mock_pw_proc.begin_password_reset.side_effect = exc.FailedToSendEmail('test failed to send')
+        res = client.post('/reset-password', data={'username_or_email': 'foobar'})
+        mock_logger.error.assert_not_called()
+        mock_flash.assert_not_called()
+        mock_pw_proc.check_complete_password_reset.assert_not_called()
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_called_once_with(mock_user)
+        self.assertEqual(res.status_code, 400)
+        self.assertIn(b'test failed to send', res.data)
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_begin_success(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_user = MagicMock()
+        mock_user_cls.query.filter().one.return_value = mock_user
+        res = client.post('/reset-password', data={'username_or_email': 'foobar'})
+        mock_logger.error.assert_not_called()
+        mock_flash.assert_not_called()
+        mock_pw_proc.check_complete_password_reset.assert_not_called()
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_called_once_with(mock_user)
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.headers['Location'], '/login')
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_complete_invalid_code(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_pw_proc.check_complete_password_reset.side_effect = exc.InvalidCode('test inv code')
+        res = client.get('/reset-password/confirm/test-code')
+        mock_flash.assert_not_called()
+        mock_pw_proc.check_complete_password_reset.assert_called_once_with('test-code', confirm=True)
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_not_called()
+        self.assertEqual(res.status_code, 400)
+        self.assertIn(b'test inv code', res.data)
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_complete_deny(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_user = MagicMock()
+        mock_pw_proc.check_complete_password_reset.return_value = (mock_user, False)
+        res = client.get('/reset-password/deny/test-code')
+        mock_flash.assert_called_once_with("Your password reset has been cancelled", 'info')
+        mock_pw_proc.check_complete_password_reset.assert_called_once_with('test-code', confirm=False)
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_not_called()
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.headers['Location'], '/login')
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_complete_confirm__missing_data(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_user = MagicMock()
+        mock_pw_proc.check_complete_password_reset.return_value = (mock_user, True)
+        res = client.post('/reset-password/confirm/test-code', data={})
+        mock_flash.assert_not_called()
+        mock_pw_proc.check_complete_password_reset.assert_called_once_with('test-code', confirm=True)
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_not_called()
+        self.assertIn(b'field is required', res.data)
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_complete_confirm__mismatched_pw(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_user = MagicMock()
+        mock_pw_proc.check_complete_password_reset.return_value = (mock_user, True)
+        res = client.post('/reset-password/confirm/test-code', data={'password': 'foo', 'repassword': 'bar'})
+        mock_flash.assert_not_called()
+        mock_pw_proc.check_complete_password_reset.assert_called_once_with('test-code', confirm=True)
+        mock_pw_proc.complete_password_reset.assert_not_called()
+        mock_pw_proc.begin_password_reset.assert_not_called()
+        self.assertIn(b'Both passwords must match', res.data)
+
+    @mock_user_view()
+    @patch('bc_fsf_user.view.password')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.User')
+    @patch('bc_fsf_user.view.logger')
+    def test_complete_confirm(self, mock_logger, mock_user_cls, mock_flash, mock_pw_proc, client, **kwargs):
+        mock_user = MagicMock()
+        mock_pw_proc.check_complete_password_reset.return_value = (mock_user, True)
+        res = client.post('/reset-password/confirm/test-code', data={'password': 'foo', 'repassword': 'foo'})
+        mock_flash.assert_called_once_with("Your password has been reset and you may now log in.", 'success')
+        mock_pw_proc.check_complete_password_reset.assert_called_once_with('test-code', confirm=True)
+        mock_pw_proc.complete_password_reset.assert_called_once_with(mock_user, 'foo')
+        mock_pw_proc.begin_password_reset.assert_not_called()
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.headers['Location'], '/login')
+
 
 # class TestView__TOTPSetup(TestCase):
 #     pass
