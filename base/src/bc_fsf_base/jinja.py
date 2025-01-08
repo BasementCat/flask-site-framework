@@ -2,6 +2,8 @@
 
 from typing import Optional, Any
 
+import math
+
 from flask import Flask, request, current_app
 import arrow
 
@@ -168,3 +170,7 @@ def maybe_filter(fn: str, *args, **kwargs) -> Any:
     if fn in current_app.jinja_env.filters:
         return current_app.jinja_env.filters[fn](*args, **kwargs)
     return ''
+
+
+jinja_filter('ceil')(math.ceil)
+jinja_filter('floor')(math.floor)

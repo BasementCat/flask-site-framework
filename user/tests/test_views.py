@@ -1062,31 +1062,133 @@ class TestView__ResetPassword(TestCase):
         self.assertEqual(res.headers['Location'], '/login')
 
 
-# class TestView__TOTPSetup(TestCase):
-#     pass
+class TestView__TOTPSetup(TestCase):
+    @mock_user_view(has_user=True, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_no_perm(self, mock_redir, mock_flash, mock_totp, user, client, **kwargs):
+        with client:
+            res = client.get('/edit/1/totp')
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertEqual(res.status_code, 302)
+            self.assertEqual(res.headers['Location'], '/login')
 
-# # @bp.route('/edit/<int:user_id>/totp', methods=['GET', 'POST'])
-# # @require('user.load')
-# # @require('user.can', 'edit_user', 'edit_other_user', 'edit_user_admin', 'edit_other_user_admin', obj_key='user', skip_totp_setup=True)
-# # def totp_setup(user, *args, **kwargs):
-# #     if not current_app.config['USERS_ALLOW_TOTP']:
-# #         abort(404)
+    @mock_user_view('edit_user', has_user=True, upd_config={'USERS_ALLOW_TOTP': False})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_disabled(self, mock_redir, mock_flash, mock_totp, user, client, **kwargs):
+        with client:
+            res = client.get('/edit/1/totp')
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertEqual(res.status_code, 404)
 
-# #     form = TOTPValidationForm()
-# #     if form.validate_on_submit():
-# #         try:
-# #             user.complete_totp_setup(form.code.data)
-# #             if user.is_logged_in:
-# #                 session['totp_login'] = True
-# #             flash("TOTP setup is complete", 'success')
-# #             return redir_after_login()
-# #         except RuntimeError as e:
-# #             flash(str(e), 'danger')
+    @mock_user_view('edit_user', has_user=True, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_begin__complete(self, mock_redir, mock_flash, mock_totp, user, client, **kwargs):
+        with client:
+            mock_totp.begin_totp_setup.side_effect = exc.ProcessComplete
+            res = client.get('/edit/1/totp')
+            mock_totp.begin_totp_setup.assert_called_once_with(user)
+            mock_redir.assert_called_once_with()
+            self.assertEqual(res.data, b'testredir')
 
-# #     try:
-# #         user.begin_totp_setup()
-# #     except RuntimeError:
-# #         # setup already in progress; use the existing data
-# #         pass
+    @mock_user_view('edit_user', has_user=True, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_begin__inprogress(self, mock_redir, mock_flash, mock_totp, user, client, **kwargs):
+        with client:
+            mock_totp.begin_totp_setup.side_effect = exc.ProcessInProgress
+            res = client.get('/edit/1/totp')
+            mock_totp.begin_totp_setup.assert_called_once_with(user)
+            mock_redir.assert_not_called()
+            self.assertIn(b'TOTP Setup', res.data)
 
-# #     return render_template('user/totp_setup.html.j2', user=user)
+    @mock_user_view('edit_user', has_user=True, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_begin(self, mock_redir, mock_flash, mock_totp, user, client, **kwargs):
+        with client:
+            res = client.get('/edit/1/totp')
+            mock_totp.begin_totp_setup.assert_called_once_with(user)
+            mock_redir.assert_not_called()
+            self.assertIn(b'TOTP Setup', res.data)
+
+    @mock_user_view('edit_user', has_user=True, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.forms.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_complete__missing_data(self, mock_redir, mock_flash, mock_form_totp, mock_totp, user, client, **kwargs):
+        with client:
+            res = client.post('/edit/1/totp', data={})
+            mock_redir.assert_not_called()
+            mock_flash.assert_not_called()
+            mock_totp.begin_totp_setup.assert_called_once_with(user)
+            mock_form_totp.complete_totp_setup.assert_not_called()
+            self.assertIn(b'field is required', res.data)
+
+    @mock_user_view('edit_user', has_user=True, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.forms.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_complete__invalid_code(self, mock_redir, mock_flash, mock_form_totp, mock_totp, user, client, **kwargs):
+        with client:
+            mock_form_totp.complete_totp_setup.side_effect = exc.InvalidCode('test inv code')
+            res = client.post('/edit/1/totp', data={'code': '123456'})
+            mock_redir.assert_not_called()
+            mock_flash.assert_not_called()
+            mock_totp.begin_totp_setup.assert_called_once_with(user)
+            mock_form_totp.complete_totp_setup.assert_called_once_with(user, '123456')
+            self.assertIn(b'test inv code', res.data)
+
+    @mock_user_view('edit_user', has_user=True, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.forms.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_complete__not_inprogress(self, mock_redir, mock_flash, mock_form_totp, mock_totp, user, client, **kwargs):
+        with client:
+            mock_form_totp.complete_totp_setup.side_effect = exc.ProcessNotInProgress('test not inprogress')
+            res = client.post('/edit/1/totp', data={'code': '123456'})
+            mock_redir.assert_not_called()
+            mock_flash.assert_not_called()
+            mock_totp.begin_totp_setup.assert_called_once_with(user)
+            mock_form_totp.complete_totp_setup.assert_called_once_with(user, '123456')
+            self.assertIn(b'test not inprogress', res.data)
+
+    @mock_user_view('edit_user', has_user={'is_logged_in': False}, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.forms.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_complete__user_notloggedin(self, mock_redir, mock_flash, mock_form_totp, mock_totp, user, client, **kwargs):
+        with client:
+            res = client.post('/edit/1/totp', data={'code': '123456'})
+            mock_redir.assert_called_once_with()
+            mock_flash.assert_called_once_with("TOTP setup is complete", 'success')
+            mock_totp.begin_totp_setup.assert_not_called()
+            mock_form_totp.complete_totp_setup.assert_called_once_with(user, '123456')
+            self.assertIsNone(session.get('totp_login'))
+            self.assertEqual(res.data, b'testredir')
+
+    @mock_user_view('edit_user', has_user={'is_logged_in': True}, upd_config={'USERS_ALLOW_TOTP': True})
+    @patch('bc_fsf_user.view.totp')
+    @patch('bc_fsf_user.forms.totp')
+    @patch('bc_fsf_user.view.flash')
+    @patch('bc_fsf_user.view.redir_after_login', return_value='testredir')
+    def test_complete(self, mock_redir, mock_flash, mock_form_totp, mock_totp, user, client, **kwargs):
+        with client:
+            res = client.post('/edit/1/totp', data={'code': '123456'})
+            mock_redir.assert_called_once_with()
+            mock_flash.assert_called_once_with("TOTP setup is complete", 'success')
+            mock_totp.begin_totp_setup.assert_not_called()
+            mock_form_totp.complete_totp_setup.assert_called_once_with(user, '123456')
+            self.assertTrue(session.get('totp_login'))
+            self.assertEqual(res.data, b'testredir')

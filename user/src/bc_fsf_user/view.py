@@ -10,7 +10,7 @@ from bc_fsf_base import require, event
 from bc_fsf_database import db
 from .models import User
 from .forms import LoginForm, PasswordResetInitForm, PasswordResetForm, TOTPValidationForm, UserForm
-from .process import exc, email, password
+from .process import exc, email, password, totp
 
 
 bp = Blueprint('user', __name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
@@ -166,21 +166,21 @@ def totp_setup(user, *args, **kwargs):
     if not current_app.config['USERS_ALLOW_TOTP']:
         abort(404)
 
-    form = TOTPValidationForm(setup=True)
+    form = TOTPValidationForm(user, setup=True)
     if form.validate_on_submit():
-        try:
-            user.complete_totp_setup(form.code.data)
-            if user.is_logged_in:
-                session['totp_login'] = True
-            flash("TOTP setup is complete", 'success')
-            return redir_after_login()
-        except RuntimeError as e:
-            flash(str(e), 'danger')
+        # form performs TOTP validation
+        if user.is_logged_in:
+            session['totp_login'] = True
+        flash("TOTP setup is complete", 'success')
+        return redir_after_login()
 
     try:
-        user.begin_totp_setup()
-    except RuntimeError:
+        totp.begin_totp_setup(user)
+    except exc.ProcessComplete:
+        # setup is done
+        return redir_after_login()
+    except exc.ProcessInProgress:
         # setup already in progress; use the existing data
         pass
 
-    return render_template('user/totp_setup.html.j2', user=user)
+    return render_template('user/totp_setup.html.j2', form=form, user=user)
