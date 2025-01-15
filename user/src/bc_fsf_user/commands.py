@@ -1,84 +1,68 @@
 """Mailing list commands"""
 
-# from typing import Any, Union, Optional
-
-# import csv, io, sys
 import getpass
+import os
+import json
+import datetime
 
 import click
 from flask import current_app
 from flask.cli import AppGroup
 from tabulate import tabulate
-# import arrow
-# from markdown import markdown
+import arrow
+import pyotp
 
 from bc_fsf_base import event
-# from bc_fsf_database import db
+from bc_fsf_database import db
 from .models import User
 
 
 cli = AppGroup('user')
 
 
-# def pb(v: Any, empty_as_false: bool=False, return_none: bool=False) -> bool:
-#     """\
-#     Parse a value as a boolean.
-
-#     If empty_as_false, treat an empty value as false instead of raising ValueError
-#     If return_none, and the value is None, just return None
-
-#     Only the first character of the resulting string is considered
-#     """
-
-#     if v is None and return_none:
-#         return None
-#     v = str(v).strip()
-#     if not v:
-#         if empty_as_false:
-#             return False
-#         raise ValueError("Value cannot be empty")
-#     if v[0] in ('t', 'y', '1'):
-#         return True
-#     elif v[0] in ('f', 'n', '0'):
-#         return False
-#     raise RuntimeError("Value cannot be converted to bool")
-
-
-# def value_or_none(v: Union[str, None]) -> Union[str, None]:
-#     """\
-#     Ensure a value is a string, or None
-#     """
-
-#     if isinstance(v, str):
-#         return v.strip()
-#     return v
-
-
-# def clean_dict(d: dict) -> dict:
-#     """\
-#     Filter a dictionary, returning a new dict with only keys where the value was
-#     not None
-#     """
-
-#     out = {}
-#     for k, v in d.items():
-#         v = value_or_none(v)
-#         if v is not None:
-#             out[k] = v
-#     return out
-
-
 @cli.command('list')
 @click.option('-v', '--verbose', count=True)
 def list_users(verbose):
+    def code(user, type_):
+        if getattr(user, f'{type_}_code'):
+            exp = getattr(user, f'{type_}_expiration')
+            if exp < arrow.utcnow():
+                return 'Expired'
+            return 'Yes'
+        return ''
+
+    def email_conf(user):
+        out = code(user, 'email_confirmation')
+        if out:
+            if user.new_email:
+                out += f' - {user.new_email}'
+        return out
+
+    def status(user):
+        out = []
+        if not user.is_approved:
+            out.append('Unapproved')
+        if user.is_disabled:
+            out.append(f'Disabled - {user.is_disabled}')
+        return ', '.join(out)
+
+    def totp(user):
+        if user.totp_secret:
+            return 'Yes'
+        elif user.new_totp_secret:
+            return 'Pending'
+        return ''
+
     headers = {
+        'ID': lambda u: u.id,
         'Username': lambda u: u.username,
         'Email': lambda u: u.email,
-        'Status': lambda u: str(u.status),
+        'Status': status,
     }
     if verbose >= 1:
         headers.update({
             'Name': lambda u: u.name or '',
+            'Timezone': lambda u: u.timezone,
         })
     if verbose >= 2:
         headers.update({
@@ -87,9 +71,9 @@ def list_users(verbose):
         })
     if verbose >= 3:
         headers.update({
-            'Has ECC': lambda u: 'Yes' if u.email_confirmation_code else '',
-            'Has PRC': lambda u: 'Yes' if u.password_reset_code else '',
-            'Has TOTP': lambda u: 'Yes' if u.totp_secret else '',
+            'Has ECC': email_conf,
+            'Has PRC': lambda u: code(u, 'password_reset'),
+            'Has TOTP': totp,
         })
     if verbose >= 4:
         headers.update({
@@ -103,7 +87,7 @@ def list_users(verbose):
         for getter in headers.values():
             row.append(getter(u))
         rows.append(row)
-    print(tabulate.tabulate(rows, headers=t_headers))
+    print(tabulate(rows, headers=t_headers))
 
 
 @cli.command('perms')
@@ -132,10 +116,10 @@ def list_roles_perms():
         ])
 
     print("Permissions:")
-    print(tabulate.tabulate(perm_rows, headers=perm_headers))
+    print(tabulate(perm_rows, headers=perm_headers))
     print()
     print("Roles:")
-    print(tabulate.tabulate(role_rows, headers=role_headers))
+    print(tabulate(role_rows, headers=role_headers))
 
 
 @cli.command('add')
@@ -170,7 +154,7 @@ def add_user(username, email, password, generate_password, name, totp, bio, role
         'permissions': permissions.split(',') if permissions else None,
         'timezone': timezone,
     }
-    _, user, messages = event.publish(
+    user, _, errs, warns, meta = event.publish(
         'user.create',
         (properties, None, None),
         do_totp_setup=totp,
@@ -178,7 +162,10 @@ def add_user(username, email, password, generate_password, name, totp, bio, role
         skip_email_confirmation=True,
     )
 
-    event.print_flashed(messages)
+    for e in errs:
+        print('ERROR:', e)
+    for e in warns:
+        print('WARN:', e)
     if user:
         print(f"Created user {user.username} as #{user.id}")
         print(f"User's password is: {password}")
@@ -202,7 +189,7 @@ def add_user(username, email, password, generate_password, name, totp, bio, role
 @click.option('-E', '--new-email', help="Set the user's email")
 @click.option('-p', '--new-password', help="Set the user's new password")
 @click.option('-P', '--ask-new-password', is_flag=True, help="Ask for a new password for the user")
-@click.option('-G', '--generate-new-password', is_flag=True, help="Generate a new password for the user")
+@click.option('-G', '--generate-new-password', help="Generate a new password for the user of this length")
 @click.option('-n', '--new-name', help="Set a new name for the user, '-' to clear")
 @click.option('-b', '--new-bio', help="Set a new bio for the user, '-' to clear")
 @click.option('-r', '--add-roles', help="Add comma-separated roles to the user")
@@ -222,7 +209,7 @@ def edit_user(id, username, approve, verify, nopwreset, nototpreset, enable, dis
         user = User.query.get(id)
     elif username:
         user = User.query.filter(User.username.like(username)).first()
-    if not username:
+    if not user:
         raise RuntimeError("Can't find user")
 
     if approve:
@@ -258,8 +245,8 @@ def edit_user(id, username, approve, verify, nopwreset, nototpreset, enable, dis
         while not new_password:
             new_password = getpass.getpass("Password: ")
         user.set_password(new_password, commit=False)
-    elif generate_password:
-        new_password = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_-+={[}]|\\:;"\'<,>.?/', k=int(generate_password)))
+    elif generate_new_password:
+        new_password = ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_-+={[}]|\\:;"\'<,>.?/', k=int(generate_new_password)))
         user.set_password(new_password, commit=False)
 
     if new_name:
@@ -288,3 +275,91 @@ def edit_user(id, username, approve, verify, nopwreset, nototpreset, enable, dis
     print(f"Updated user #{user.id} {user.username}")
     if new_password:
         print(f"User's password is: {new_password}")
+
+
+@cli.command('delete')
+@click.option('-i', '--id', help="User ID to edit")
+@click.option('-u', '--username', help="Username to edit")
+def edit_user(id, username):
+    if not (id or username) or (id and username):
+        raise RuntimeError("Only one of --id or --username is required")
+
+    user = None
+    if id:
+        user = User.query.get(id)
+    elif username:
+        user = User.query.filter(User.username.like(username)).first()
+    if not user:
+        raise RuntimeError("Can't find user")
+
+    if not input("Are you sure you want to delete this user? ").strip().lower().startswith('y'):
+        print("Abort")
+        return
+
+    db.session.delete(user)
+    db.session.commit()
+
+
+@cli.command('totp')
+@click.option('-a', '--add', help="Add a token")
+@click.option('-u', '--update', help="With --add, update the underlying token with this id")
+@click.option('-d', '--description', help="Description for the added token (required with --add, unless --update)")
+@click.option('-r', '--remove', help="Delete a token by ID")
+def totp_debug(add, update, description, remove):
+    if add and remove:
+        raise RuntimeError("Can't use --add & --remove")
+    if add and not description and not update:
+        raise RuntimeError("--description is required with --add without --update")
+    if update and not add:
+        raise RuntimeError("--add is required for --update")
+    if remove and (update or description):
+        raise RuntimeError("Can't use --update or --description with --remove")
+
+    fname = os.path.join(current_app.instance_path, 'totp-gen-test.json')
+    if os.path.exists(fname):
+        with open(fname, 'r') as fp:
+            tokens = json.load(fp)
+    else:
+        tokens = []
+
+    if add or remove:
+        def resolve_id(id):
+            try:
+                id = int(id)
+                t = tokens[id]
+                return id, t
+            except (TypeError, ValueError):
+                raise RuntimeError("Provided id is not int")
+            except IndexError:
+                raise RuntimeError("Provided id does not exist")
+
+        if add:
+            if update:
+                id, t = resolve_id(update)
+                t['token'] = add
+                if description:
+                    t['description'] = description
+                print("Updated token:", id, t['description'])
+            else:
+                tokens.append({'token': add, 'description': description})
+                print("Added token:", description)
+
+        if remove:
+            id, t = resolve_id(remove)
+            del tokens[id]
+            print("Removed token:", t['description'])
+
+        with open(fname, 'w') as fp:
+            json.dump(tokens, fp, indent=4)
+
+    headers = ['ID', 'Description', 'Code', 'Remaining s']
+    rows = []
+    for i, t in enumerate(tokens):
+        totp = pyotp.TOTP(t['token'])
+        rows.append([
+            i,
+            t['description'],
+            totp.now(),
+            totp.interval - datetime.datetime.now().timestamp() % totp.interval
+        ])
+    print(tabulate(rows, headers=headers))

@@ -53,8 +53,8 @@ def begin_email_confirmation(user: User, new_email: Optional[str]=None):
                     new_email=user.new_email,
                     code=user.email_confirmation_code,
                     expires=user.email_confirmation_expiration,
-                    confirm_url=url_for('user.confirm_email', code=user.email_confirmation_code, action='confirm'),
-                    deny_url=url_for('user.confirm_email', code=user.email_confirmation_code, action='deny'),
+                    confirm_url=url_for('user.confirm_email', code=user.email_confirmation_code, action='confirm', _external=True),
+                    deny_url=url_for('user.confirm_email', code=user.email_confirmation_code, action='deny', _external=True),
                 ) \
                 .send_message()
         except:

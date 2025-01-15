@@ -3,10 +3,29 @@
 
 {% block title %}TOTP Setup{% endblock %}
 
+{% block styles %}
+    {{ super() }}
+    <style>
+        .totp-setup-qr {
+            display: block;
+            margin: 0 auto;
+            float: none;
+        }
+        .totp-setup-secret, .totp-setup-backup {
+            font-family: monospace;
+            font-size: 1.15em;
+            text-align: center;
+        }
+        .totp-setup-backup {
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
 {% block w_content %}
     <h2>Set Up Authenticator App</h2>
     <p>Set up your authenticator app by scanning this QR code</p>
-    {{ user.get_totp_qr() |safe }}
+    {{ totp_qr |safe }}
 
     <h3>Alternate Method</h3>
     <p>If you cannot scan the code, you may enter this secret key directly:</p>

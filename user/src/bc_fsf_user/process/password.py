@@ -32,8 +32,8 @@ def begin_password_reset(user: User):
                 user=user,
                 code=user.password_reset_code,
                 expires=user.password_reset_expiration,
-                confirm_url=url_for('user.reset_password', code=user.password_reset_code, action='confirm'),
-                deny_url=url_for('user.reset_password', code=user.password_reset_code, action='deny'),
+                confirm_url=url_for('user.reset_password', code=user.password_reset_code, action='confirm', _external=True),
+                deny_url=url_for('user.reset_password', code=user.password_reset_code, action='deny', _external=True),
             ) \
             .send_message()
     except:

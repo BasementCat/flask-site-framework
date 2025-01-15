@@ -501,6 +501,7 @@ class AppFactory:
         app = Flask(
             __name__,
             root_path=self.base_path,
+            instance_path=os.path.join(self.base_path, 'instance'),
             template_folder=os.path.join(self.base_path, 'templates'),
             static_folder=os.path.join(self.base_path, 'static'),
         )

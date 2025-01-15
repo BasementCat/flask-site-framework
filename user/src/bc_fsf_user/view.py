@@ -37,7 +37,7 @@ def signup():
             'name': form.name.data,
             'bio': form.bio.data,
         }
-        user, props, warnings, errors, meta = event.publish('user.create', (data, None, None))
+        user, props, warnings, errors, meta = event.publish('user.create', (None, data, None, None, None))
         for e in errors:
             flash(e, 'danger')
         for w in warnings:
@@ -60,13 +60,15 @@ def signup():
 
 
 @bp.route('/login', methods=['GET', 'POST'])
-@require('user.can', 'login', always_abort=True)
+@require('user.can', 'login', always_abort=True, skip_after_permission_check=True)
 def login():
     form = LoginForm()
     user = form.validate_on_submit()
     if user:
         event.publish('user.login', user)
-        # TOTP redirection done by user.can - not on this url but next
+        res = event.publish('user.after_permission_check', None, user)
+        if res:
+            return res
         return redir_after_login()
     elif user is None:
         flash("Invalid username or password", 'danger')
@@ -183,4 +185,4 @@ def totp_setup(user, *args, **kwargs):
         # setup already in progress; use the existing data
         pass
 
-    return render_template('user/totp_setup.html.j2', form=form, user=user)
+    return render_template('user/totp_setup.html.j2', form=form, user=user, totp_qr=totp.get_totp_qr(user, secret=user.new_totp_secret))

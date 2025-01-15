@@ -246,7 +246,7 @@ class TestAfterPermCheck__EmailConf(TestCase):
             res = events.check_email_conf_required('user.after_permission_check', None, user)
             mock_flash.assert_called_once_with("You must confirm your email before you can log in", 'danger')
             mock_event.publish.assert_called_once_with('user.logout')
-            mock_url_for.assert_called_once_with('/')
+            mock_url_for.assert_called_once_with('user.login')
             mock_redirect.assert_called_once_with(mock_url_for())
             self.assertEqual(res, mock_redirect())
 
@@ -290,8 +290,8 @@ class TestAfterPermCheck__AdminApprove(TestCase):
             res = events.check_admin_approve_required('user.after_permission_check', None, user)
             mock_flash.assert_called_once_with("Your account is disabled", 'danger')
             mock_event.publish.assert_called_once_with('user.logout')
-            mock_url_for.assert_called_once_with('/')
-            mock_redirect.assert_called_once_with(mock_url_for())
+            mock_url_for.assert_not_called()
+            mock_redirect.assert_called_once_with('/')
             self.assertEqual(res, mock_redirect())
 
     @patch('bc_fsf_user.events.flash')
@@ -318,7 +318,7 @@ class TestAfterPermCheck__AdminApprove(TestCase):
             res = events.check_admin_approve_required('user.after_permission_check', None, user)
             mock_flash.assert_called_once_with("Your account must be approved before you can log in", 'danger')
             mock_event.publish.assert_called_once_with('user.logout')
-            mock_url_for.assert_called_once_with('/')
+            mock_url_for.assert_called_once_with('user.login')
             mock_redirect.assert_called_once_with(mock_url_for())
             self.assertEqual(res, mock_redirect())
 
@@ -698,155 +698,216 @@ class TestCreateUser__Setup(TestCase):
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__no_user(self, mock_email, mock_event, mock_totp):
-        testuser = None
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=False, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_not_called()
-        mock_totp.begin_totp_setup.assert_not_called()
-        self.assertIsNone(user)
-        self.assertFalse(bool(warnings))
-        self.assertFalse(bool(errors))
-        self.assertEqual(meta, {
-            'did_totp_setup': None,
-            'did_email_confirmation': None,
-        })
+        with mock_app({}) as app:
+            testuser = None
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=True)
+            mock_email.begin_email_confirmation.assert_not_called()
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertIsNone(user)
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': None,
+                'did_email_confirmation': None,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__no_totp(self, mock_email, mock_event, mock_totp):
-        testuser = MockUser()
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=False, skip_email_confirmation=False, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_called_once_with(testuser)
-        mock_totp.begin_totp_setup.assert_not_called()
-        self.assertEqual(user, testuser)
-        self.assertFalse(bool(warnings))
-        self.assertFalse(bool(errors))
-        self.assertEqual(meta, {
-            'did_totp_setup': None,
-            'did_email_confirmation': True,
-        })
+        with mock_app({}) as app:
+            testuser = MockUser()
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=False)
+            mock_email.begin_email_confirmation.assert_called_once_with(testuser)
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertEqual(user, testuser)
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': None,
+                'did_email_confirmation': True,
+            })
+
+    @patch('bc_fsf_user.events.totp')
+    @patch('bc_fsf_user.events.event')
+    @patch('bc_fsf_user.events.email')
+    def test_create__totp_default(self, mock_email, mock_event, mock_totp):
+        with mock_app({}) as app:
+            testuser = MockUser()
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None))
+            mock_email.begin_email_confirmation.assert_called_once_with(testuser)
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertEqual(user, testuser)
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': None,
+                'did_email_confirmation': True,
+            })
+
+    @patch('bc_fsf_user.events.totp')
+    @patch('bc_fsf_user.events.event')
+    @patch('bc_fsf_user.events.email')
+    def test_create__totp_default__required(self, mock_email, mock_event, mock_totp):
+        with mock_app({'USERS_REQUIRE_TOTP': 5}) as app:
+            testuser = MockUser(rolegroup=MagicMock(maxlevel=5))
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None))
+            mock_email.begin_email_confirmation.assert_called_once_with(testuser)
+            mock_totp.begin_totp_setup.assert_called_once_with(testuser, skip_confirm=None)
+            self.assertEqual(user, testuser)
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': True,
+                'did_email_confirmation': True,
+            })
+
+    @patch('bc_fsf_user.events.totp')
+    @patch('bc_fsf_user.events.event')
+    @patch('bc_fsf_user.events.email')
+    def test_create__totp_default__not_required(self, mock_email, mock_event, mock_totp):
+        with mock_app({'USERS_REQUIRE_TOTP': 5}) as app:
+            testuser = MockUser(rolegroup=MagicMock(maxlevel=4))
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None))
+            mock_email.begin_email_confirmation.assert_called_once_with(testuser)
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertEqual(user, testuser)
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': None,
+                'did_email_confirmation': True,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__totp__skip_confirm(self, mock_email, mock_event, mock_totp):
-        testuser = MockUser()
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=False, skip_totp_confirm=True)
-        mock_email.begin_email_confirmation.assert_called_once_with(testuser)
-        mock_totp.begin_totp_setup.assert_called_once_with(testuser, skip_confirm=True)
-        self.assertFalse(bool(warnings))
-        self.assertFalse(bool(errors))
-        self.assertEqual(meta, {
-            'did_totp_setup': True,
-            'did_email_confirmation': True,
-        })
+        with mock_app({}) as app:
+            testuser = MockUser()
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=True, skip_totp_confirm=True)
+            mock_email.begin_email_confirmation.assert_called_once_with(testuser)
+            mock_totp.begin_totp_setup.assert_called_once_with(testuser, skip_confirm=True)
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': True,
+                'did_email_confirmation': True,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__totp(self, mock_email, mock_event, mock_totp):
-        testuser = MockUser()
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=False, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_called_once_with(testuser)
-        mock_totp.begin_totp_setup.assert_called_once_with(testuser, skip_confirm=False)
-        self.assertFalse(bool(warnings))
-        self.assertFalse(bool(errors))
-        self.assertEqual(meta, {
-            'did_totp_setup': True,
-            'did_email_confirmation': True,
-        })
+        with mock_app({}) as app:
+            testuser = MockUser()
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=True)
+            mock_email.begin_email_confirmation.assert_called_once_with(testuser)
+            mock_totp.begin_totp_setup.assert_called_once_with(testuser, skip_confirm=None)
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': True,
+                'did_email_confirmation': True,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__totp__ecomplete(self, mock_email, mock_event, mock_totp):
-        testuser = MockUser()
-        mock_totp.begin_totp_setup.side_effect = bc_fsf_user_proc_exc.ProcessComplete('foo')
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=False, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_called_once_with(testuser)
-        mock_totp.begin_totp_setup.assert_called_once_with(testuser, skip_confirm=False)
-        self.assertIn('foo', warnings)
-        self.assertFalse(bool(errors))
-        self.assertEqual(meta, {
-            'did_totp_setup': True,
-            'did_email_confirmation': True,
-        })
+        with mock_app({}) as app:
+            testuser = MockUser()
+            mock_totp.begin_totp_setup.side_effect = bc_fsf_user_proc_exc.ProcessComplete('foo')
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (testuser, {}, None, None, None), do_totp_setup=True)
+            mock_email.begin_email_confirmation.assert_called_once_with(testuser)
+            mock_totp.begin_totp_setup.assert_called_once_with(testuser, skip_confirm=None)
+            self.assertIn('foo', warnings)
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': True,
+                'did_email_confirmation': True,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__totp__einprogress(self, mock_email, mock_event, mock_totp):
-        user = MockUser()
-        mock_totp.begin_totp_setup.side_effect = bc_fsf_user_proc_exc.ProcessInProgress('foo')
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=False, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_called_once_with(user)
-        mock_totp.begin_totp_setup.assert_called_once_with(user, skip_confirm=False)
-        self.assertFalse(bool(warnings))
-        self.assertIn('foo', errors)
-        self.assertEqual(meta, {
-            'did_totp_setup': True,
-            'did_email_confirmation': True,
-        })
+        with mock_app({}) as app:
+            user = MockUser()
+            mock_totp.begin_totp_setup.side_effect = bc_fsf_user_proc_exc.ProcessInProgress('foo')
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None), do_totp_setup=True)
+            mock_email.begin_email_confirmation.assert_called_once_with(user)
+            mock_totp.begin_totp_setup.assert_called_once_with(user, skip_confirm=None)
+            self.assertFalse(bool(warnings))
+            self.assertIn('foo', errors)
+            self.assertEqual(meta, {
+                'did_totp_setup': True,
+                'did_email_confirmation': True,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__no_email(self, mock_email, mock_event, mock_totp):
-        user = MockUser()
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=True, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_not_called()
-        mock_totp.begin_totp_setup.assert_called_once_with(user, skip_confirm=False)
-        self.assertFalse(bool(warnings))
-        self.assertFalse(bool(errors))
-        self.assertEqual(meta, {
-            'did_totp_setup': True,
-            'did_email_confirmation': None,
-        })
+        with mock_app({}) as app:
+            user = MockUser()
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None), skip_email_confirmation=True)
+            mock_email.begin_email_confirmation.assert_not_called()
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': None,
+                'did_email_confirmation': None,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__email__edisabled(self, mock_email, mock_event, mock_totp):
-        user = MockUser()
-        mock_email.begin_email_confirmation.side_effect = bc_fsf_user_proc_exc.ProcessDisabled('foo')
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=False, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_called_once_with(user)
-        mock_totp.begin_totp_setup.assert_called_once_with(user, skip_confirm=False)
-        self.assertFalse(bool(warnings))
-        self.assertFalse(bool(errors))
-        self.assertEqual(meta, {
-            'did_totp_setup': True,
-            'did_email_confirmation': None,
-        })
+        with mock_app({}) as app:
+            user = MockUser()
+            mock_email.begin_email_confirmation.side_effect = bc_fsf_user_proc_exc.ProcessDisabled('foo')
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None))
+            mock_email.begin_email_confirmation.assert_called_once_with(user)
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertFalse(bool(warnings))
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': None,
+                'did_email_confirmation': None,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__email__einprogress(self, mock_email, mock_event, mock_totp):
-        user = MockUser()
-        mock_email.begin_email_confirmation.side_effect = bc_fsf_user_proc_exc.ProcessInProgress('foo')
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=False, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_called_once_with(user)
-        mock_totp.begin_totp_setup.assert_called_once_with(user, skip_confirm=False)
-        self.assertIn('foo', warnings)
-        self.assertFalse(bool(errors))
-        self.assertEqual(meta, {
-            'did_totp_setup': True,
-            'did_email_confirmation': True,
-        })
+        with mock_app({}) as app:
+            user = MockUser()
+            mock_email.begin_email_confirmation.side_effect = bc_fsf_user_proc_exc.ProcessInProgress('foo')
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None))
+            mock_email.begin_email_confirmation.assert_called_once_with(user)
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertIn('foo', warnings)
+            self.assertFalse(bool(errors))
+            self.assertEqual(meta, {
+                'did_totp_setup': None,
+                'did_email_confirmation': True,
+            })
 
     @patch('bc_fsf_user.events.totp')
     @patch('bc_fsf_user.events.event')
     @patch('bc_fsf_user.events.email')
     def test_create__email__efailedtosend(self, mock_email, mock_event, mock_totp):
-        user = MockUser()
-        mock_email.begin_email_confirmation.side_effect = bc_fsf_user_proc_exc.FailedToSendEmail('foo')
-        user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None), do_totp_setup=True, skip_email_confirmation=False, skip_totp_confirm=False)
-        mock_email.begin_email_confirmation.assert_called_once_with(user)
-        mock_totp.begin_totp_setup.assert_called_once_with(user, skip_confirm=False)
-        self.assertFalse(bool(warnings))
-        self.assertIn('foo', errors)
-        self.assertEqual(meta, {
-            'did_totp_setup': True,
-            'did_email_confirmation': False,
-        })
+        with mock_app({}) as app:
+            user = MockUser()
+            mock_email.begin_email_confirmation.side_effect = bc_fsf_user_proc_exc.FailedToSendEmail('foo')
+            user, props, warnings, errors, meta = events.create_user__setup('user.create', (user, {}, None, None, None))
+            mock_email.begin_email_confirmation.assert_called_once_with(user)
+            mock_totp.begin_totp_setup.assert_not_called()
+            self.assertFalse(bool(warnings))
+            self.assertIn('foo', errors)
+            self.assertEqual(meta, {
+                'did_totp_setup': None,
+                'did_email_confirmation': False,
+            })

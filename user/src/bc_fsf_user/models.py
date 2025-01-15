@@ -28,7 +28,7 @@ class User(TimestampMixin, db.Model):
         db.Index('ix_user_ecc', 'email_confirmation_code'),
         db.Index('ix_user_prc', 'password_reset_code'),
     )
-    id = db.Column(db.BigInteger(), nullable=False, primary_key=True, autoincrement=True)
+    id = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"), nullable=False, primary_key=True, autoincrement=True)
     username = db.Column(db.Unicode(512), nullable=False)
     email = db.Column(db.Unicode(512), nullable=False)
     hashed_password = db.Column(db.Text(), nullable=False)

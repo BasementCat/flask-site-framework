@@ -49,8 +49,8 @@ class ProcessEmailBeginTest(TestCase):
             )
             app.plugins['email'].create().render().send_message.assert_called_once()
             mock_url_for.assert_has_calls([
-                call('user.confirm_email', code=user.email_confirmation_code, action='confirm'),
-                call('user.confirm_email', code=user.email_confirmation_code, action='deny'),
+                call('user.confirm_email', code=user.email_confirmation_code, action='confirm', _external=True),
+                call('user.confirm_email', code=user.email_confirmation_code, action='deny', _external=True),
             ])
 
     @patch('bc_fsf_user.process.email.url_for')
@@ -97,8 +97,8 @@ class ProcessEmailBeginTest(TestCase):
             )
             app.plugins['email'].create().render().send_message.assert_called_once()
             mock_url_for.assert_has_calls([
-                call('user.confirm_email', code=user.email_confirmation_code, action='confirm'),
-                call('user.confirm_email', code=user.email_confirmation_code, action='deny'),
+                call('user.confirm_email', code=user.email_confirmation_code, action='confirm', _external=True),
+                call('user.confirm_email', code=user.email_confirmation_code, action='deny', _external=True),
             ])
 
     @patch('bc_fsf_user.process.email.url_for')
@@ -232,8 +232,8 @@ class ProcessPasswordBeginTest(TestCase):
             )
             app.plugins['email'].create().render().send_message.assert_called_once()
             mock_url_for.assert_has_calls([
-                call('user.reset_password', code=user.password_reset_code, action='confirm'),
-                call('user.reset_password', code=user.password_reset_code, action='deny'),
+                call('user.reset_password', code=user.password_reset_code, action='confirm', _external=True),
+                call('user.reset_password', code=user.password_reset_code, action='deny', _external=True),
             ])
 
     @patch('bc_fsf_user.process.password.url_for')

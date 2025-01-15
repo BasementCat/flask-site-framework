@@ -232,7 +232,7 @@ class TestView__Signup(TestCase):
         res = client.post('/signup', data=data)
         self.assertNotIn(b'token is missing', res.data)
         self.assertNotIn(b'field is required', res.data)
-        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_event.publish.assert_called_once_with('user.create', (None, props, None, None, None))
         mock_url_for.assert_not_called()
         mock_redirect.assert_not_called()
         mock_flash.assert_has_calls([
@@ -270,7 +270,7 @@ class TestView__Signup(TestCase):
         res = client.post('/signup', data=data)
         self.assertNotIn(b'token is missing', res.data)
         self.assertNotIn(b'field is required', res.data)
-        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_event.publish.assert_called_once_with('user.create', (None, props, None, None, None))
         mock_url_for.assert_called_once_with('.login')
         mock_redirect.assert_called_once_with(mock_url_for())
         mock_flash.assert_has_calls([
@@ -307,7 +307,7 @@ class TestView__Signup(TestCase):
         res = client.post('/signup', data=data)
         self.assertNotIn(b'token is missing', res.data)
         self.assertNotIn(b'field is required', res.data)
-        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_event.publish.assert_called_once_with('user.create', (None, props, None, None, None))
         mock_url_for.assert_called_once_with('.login')
         mock_redirect.assert_called_once_with(mock_url_for())
         mock_flash.assert_has_calls([
@@ -344,7 +344,7 @@ class TestView__Signup(TestCase):
         res = client.post('/signup', data=data)
         self.assertNotIn(b'token is missing', res.data)
         self.assertNotIn(b'field is required', res.data)
-        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_event.publish.assert_called_once_with('user.create', (None, props, None, None, None))
         mock_url_for.assert_called_once_with('.login')
         mock_redirect.assert_called_once_with(mock_url_for())
         mock_flash.assert_has_calls([
@@ -382,7 +382,7 @@ class TestView__Signup(TestCase):
         res = client.post('/signup', data=data)
         self.assertNotIn(b'token is missing', res.data)
         self.assertNotIn(b'field is required', res.data)
-        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_event.publish.assert_called_once_with('user.create', (None, props, None, None, None))
         mock_url_for.assert_called_once_with('.login')
         mock_redirect.assert_called_once_with(mock_url_for())
         mock_flash.assert_has_calls([
@@ -420,7 +420,7 @@ class TestView__Signup(TestCase):
         res = client.post('/signup', data=data)
         self.assertNotIn(b'token is missing', res.data)
         self.assertNotIn(b'field is required', res.data)
-        mock_event.publish.assert_called_once_with('user.create', (props, None, None))
+        mock_event.publish.assert_called_once_with('user.create', (None, props, None, None, None))
         mock_url_for.assert_called_once_with('.login')
         mock_redirect.assert_called_once_with(mock_url_for())
         mock_flash.assert_has_calls([
@@ -475,8 +475,13 @@ class TestView__Login(TestCase):
         mock_user = MagicMock(password='bar')
         mock_user_cls.query.filter().one.return_value = mock_user
         mock_redir_login.return_value = 'foobar'
+        mock_event.publish.return_value = None
         res = client.post('/login', data={'username_or_email': 'foo', 'password': 'bar'})
         self.assertNotIn(b'field is required', res.data)
+        mock_event.publish.assert_has_calls([
+            call('user.login', mock_user),
+            call('user.after_permission_check', None, mock_user),
+        ])
         mock_redir_login.assert_called_once_with()
         self.assertEqual(res.data, b'foobar')
 
@@ -1118,6 +1123,7 @@ class TestView__TOTPSetup(TestCase):
             mock_totp.begin_totp_setup.assert_called_once_with(user)
             mock_redir.assert_not_called()
             self.assertIn(b'TOTP Setup', res.data)
+            mock_totp.get_totp_qr.assert_called_once_with(user, secret=user.new_totp_secret)
 
     @mock_user_view('edit_user', has_user=True, upd_config={'USERS_ALLOW_TOTP': True})
     @patch('bc_fsf_user.view.totp')

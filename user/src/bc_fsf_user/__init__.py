@@ -122,9 +122,10 @@ class UserPlugin(Plugin):
         user = event.publish('user.current')
 
         if (not dec_kwargs.get('require_user') or user) and event.publish('user.can', False, *check_permissions, obj=obj):
-            res = event.publish('user.after_permission_check', None, user, skip_totp_setup=dec_kwargs.get('skip_totp_setup'))
-            if res:
-                return res
+            if not dec_kwargs.get('skip_after_permission_check'):
+                res = event.publish('user.after_permission_check', None, user, skip_totp_setup=dec_kwargs.get('skip_totp_setup'))
+                if res:
+                    return res
             return callback(*call_args, **call_kwargs)
         else:
             if user:

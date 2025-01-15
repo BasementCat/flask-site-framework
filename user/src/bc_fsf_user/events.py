@@ -90,7 +90,7 @@ def check_email_conf_required(event_name, dest, user, *args, skip_totp_setup=Fal
                     flash("You must confirm your email before you can log in", 'danger')
                     event.publish('user.logout')
                     # TODO: way to send confirmation email
-                    return redirect(url_for('/'))
+                    return redirect(url_for('user.login'))
     return dest
 
 
@@ -102,12 +102,24 @@ def check_admin_approve_required(event_name, dest, user, *args, skip_totp_setup=
                 # if a logged-in user is disabled, log them out and bail
                 flash("Your account is disabled", 'danger')
                 event.publish('user.logout')
-                return redirect(url_for('/'))
+                return redirect('/')
             if current_app.config['USERS_ADMIN_APPROVAL'] and not user.is_approved:
                 flash("Your account must be approved before you can log in", 'danger')
                 event.publish('user.logout')
-                return redirect(url_for('/'))
+                return redirect(url_for('user.login'))
     return dest
+
+
+def is_totp_required_for(user: User) -> bool:
+    level = current_app.config.get('USERS_REQUIRE_TOTP')
+    if level is not None:
+        try:
+            level = int(level)
+            if user.rolegroup.maxlevel >= level:
+                return True
+        except:
+            return user.rolegroup.contains_role(level)
+    return False
 
 
 @event.subscribes_to('user.after_permission_check')
@@ -119,15 +131,8 @@ def check_totp_setup_required(event_name, dest, user, *args, skip_totp_setup=Fal
                 need_totp = True
                 msg = "You must complete or cancel TOTP setup before continuing"
             else:
+                need_totp = is_totp_required_for(user)
                 msg = "You are required to set up two factor auth for your account"
-                level = current_app.config.get('USERS_REQUIRE_TOTP')
-                if level is not None:
-                    try:
-                        level = int(level)
-                        if user.rolegroup.maxlevel >= level:
-                            need_totp = True
-                    except:
-                        need_totp = user.rolegroup.contains_role(level)
 
             if need_totp:
                 session['url_after_login'] = session.get('url_after_login') or request.url
@@ -195,7 +200,7 @@ def create_user(event_name, data, *args, **kwargs):
 
 
 @event.subscribes_to('user.create', priority=125)
-def create_user__setup(event_name, data, *args, do_totp_setup=True, skip_email_confirmation=False, **kwargs):
+def create_user__setup(event_name, data, *args, do_totp_setup=None, skip_email_confirmation=False, **kwargs):
     user, properties, warnings, errors, meta = data
     warnings = warnings or []
     errors = errors or []
@@ -206,6 +211,9 @@ def create_user__setup(event_name, data, *args, do_totp_setup=True, skip_email_c
     })
 
     if user:
+        if do_totp_setup is None:
+            do_totp_setup = is_totp_required_for(user)
+
         if do_totp_setup:
             try:
                 totp.begin_totp_setup(user, skip_confirm=kwargs.get('skip_totp_confirm'))
@@ -217,6 +225,7 @@ def create_user__setup(event_name, data, *args, do_totp_setup=True, skip_email_c
                 errors.append(str(e))
                 # already started totp setup but not completed, user will be redirected later
                 meta['did_totp_setup'] = True
+
         if not skip_email_confirmation:
             try:
                 email.begin_email_confirmation(user)
