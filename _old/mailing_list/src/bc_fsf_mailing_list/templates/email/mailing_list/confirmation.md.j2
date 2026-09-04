@@ -1,0 +1,9 @@
+{% extends "email/mailing_list/base.md.j2" %}
+
+{% block body -%}
+Thanks for subscribing to {{ config.get('SITE_NAME') }}!
+
+[Click here]({{ sub_url }}) to confirm your email address and subscription.
+
+If you did not intend to subscribe, please [Click here]({{ unsub_url }}) to ensure you do not receive further emails from us.
+{%- endblock %}

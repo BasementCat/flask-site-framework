@@ -1,0 +1,29 @@
+{% extends "fullscreen.html.j2" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (tz) {
+                const tzfield = document.querySelector('select[name="timezone"]');
+                if (tzfield) {
+                    if (!tzfield.value) {
+                        tzfield.value = tz;
+                    }
+                } else {
+                    console.error("Failed to find timezone input");
+                }
+            }
+        } catch (e) {
+            console.error("Failed to determine user timezone: %o", e);
+        }
+    </script>
+{% endblock %}
+
+{% block w_content %}
+    {{ wtf.quick_form(form) }}
+{% endblock %}

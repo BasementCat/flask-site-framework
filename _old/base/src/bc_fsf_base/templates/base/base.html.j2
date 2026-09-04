@@ -1,0 +1,11 @@
+{% extends 'base/root.html.j2' %}
+{% import "bootstrap/utils.html" as utils %}
+
+{# general base - nav, title, opt. for full width or constrained #}
+
+{% block content %}
+    {% block above_content %}{% endblock %}
+    {{ utils.flashed_messages() }}
+    {% block main_content %}{% endblock %}
+    {% block below_content %}{% endblock %}
+{% endblock %}

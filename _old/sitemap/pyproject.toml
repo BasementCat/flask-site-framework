@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["version"]
+name = "bc_fsf_sitemap"
+dependencies = [
+]
+requires-python = ">= 3.8"
+description = "Add a sitemap to a site"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
