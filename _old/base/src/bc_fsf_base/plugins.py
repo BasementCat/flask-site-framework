@@ -22,45 +22,6 @@ from . import views
 logger = logging.getLogger(__name__)
 
 
-class BootstrapPlugin(Plugin):
-    """\
-    Install the Flask-Bootstrap plugin, and optionally include the FontAwesome
-    stylesheet.
-    """
-
-    def __init__(self, *args, with_fontawesome: bool=False, **kwargs):
-        """\
-        Initialize the plugin, if with_fontawesome is True, add the fontawesome
-        stylesheet to the page
-        """
-
-        super().__init__(*args, **kwargs)
-        self.with_fontawesome = with_fontawesome
-
-    def get_flask_plugins(self):
-        return [Bootstrap()]
-
-    def get_blueprints(self):
-        return [(None, Blueprint('_base_bs', __name__, template_folder='templates'))]
-
-    @staticmethod
-    def get_fontawesome_stylesheet(event, value, *args, **kwargs):
-        value.append('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />')
-        return value
-
-    def init_app(self, app):
-        super().init_app(app)
-        if self.with_fontawesome:
-            subscribe('base.template.stylesheets', self.get_fontawesome_stylesheet)
-
-
-@BootstrapPlugin.jinja_global()
-def fa(icon, collection='fa', cls=''):
-    """\
-    Generate markup for a FontAwesome icon
-    """
-
-    return f'<span class="{collection} fa-{icon} {cls}"></span>'
 
 
 class CachePlugin(Plugin):

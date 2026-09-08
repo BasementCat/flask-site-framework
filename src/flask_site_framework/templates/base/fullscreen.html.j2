@@ -1,4 +1,4 @@
-{% extends 'base/root.html.j2' %}
+{% extends 'base.html.j2' %}
 {% import "bootstrap/utils.html" as utils %}
 
 {% block styles %}
@@ -26,11 +26,11 @@
 {% block content %}
     <div class="container">
         <div class="row fullscreen">
-            <div class="col-xs-12 fs-centered">
+            <div class="col-12 fs-centered">
                 {% block fs_content %}
                     {% if self.title() %}<h1>{% block title %}{% endblock %}</h1>{% endif %}
-                    {{ utils.flashed_messages() }}
-                    <div class="well well-sm">
+                    {{ bootstrap.render_messages() }}
+                    <div class="panel panel-sm">
                         {% block w_content %}{% endblock %}
                     </div>
                 {% endblock %}
