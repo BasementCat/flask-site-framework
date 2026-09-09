@@ -1,15 +1,16 @@
 """Caching implementation"""
 
 from typing import Any, Union, Optional
-
 from threading import Lock
 import time
 from functools import wraps
 import hashlib
 import pickle
 
-from flask import current_app
+from flask import Flask, current_app
 from flask_redis import FlaskRedis
+
+from . import Plugin
 
 
 class CacheDriver:
@@ -83,7 +84,7 @@ class MemoryCacheDriver(CacheDriver):
     def get(self, key: str) -> Any:
         with self.lock:
             out = self.data[key]
-            if out['expires'] < time.time():
+            if out['expires'] is not None and out['expires'] < time.time():
                 del self.data[key]
                 raise KeyError(key)
             return out['data']
@@ -111,7 +112,10 @@ class RedisCacheDriver(CacheDriver):
         return [self.redis]
 
     def set(self, key: str, value: Any, expires_at: Optional[Union[int, float]]=None):
-        self.redis.set(key, pickle.dumps(value), pxat=int(expires_at * 1000))
+        if expires_at is not None:
+            self.redis.set(key, pickle.dumps(value), pxat=int(expires_at * 1000))
+        else:
+            self.redis.set(key, pickle.dumps(value))
 
     def get(self, key: str) -> Any:
         res = self.redis.get(key)
@@ -246,5 +250,34 @@ def make_key(*args, **kwargs) -> str:
         kp = []
         for k in sorted(kwargs.keys()):
             kp.append(k + ':' + str(kwargs[k]))
-        parts.append(hashlib.new('sha256', ':'.join(kp)).hexdigest())
+        parts.append(hashlib.new('sha256', ':'.join(kp).encode('utf-8')).hexdigest())
     return ':'.join(parts)
+
+
+class CachePlugin(Plugin):
+    """\
+    Enable caching on the application
+    """
+
+    def __init__(self, app: Optional[Flask]=None, driver: Optional[CacheDriver]=None):
+        """\
+        Initialize the cache plugin with an optional flask app.
+        If no cache driver is provided, the memory cache driver is used.
+        """
+
+        self.driver = driver or MemoryCacheDriver()
+        super().__init__(app=app)
+
+    def get_config(self):
+        return self.driver.require_config({
+            'REDIS_URL': {
+                'description': "URI to connect to Redis, like redis://:password@localhost:6379/0 or unix://:password@/path/to/socket.sock?db=0",
+            },
+        })
+
+    def get_flask_plugins(self):
+        return self.driver.get_flask_plugins()
+
+    def init_app(self, app):
+        super().init_app(app)
+        app._cache_driver = self.driver

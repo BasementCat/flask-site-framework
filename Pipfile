@@ -8,6 +8,8 @@ flask = "*"
 dotenv = "*"
 arrow = "*"
 bootstrap-flask = "*"
+redis = {extras = ["hiredis"], version = "*"}
+flask-redis = "*"
 
 [dev-packages]
 

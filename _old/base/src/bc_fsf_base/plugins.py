@@ -24,71 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 
-class CachePlugin(Plugin):
-    """\
-    Enable caching on the application
-    """
 
-    def __init__(self, app: Optional[Flask]=None, driver: Optional[CacheDriver]=None):
-        """\
-        Initialize the cache plugin with an optional flask app.
-        If no cache driver is provided, the memory cache driver is used.
-        """
-
-        self.driver = driver or MemoryCacheDriver()
-        super().__init__(app=app)
-
-    def get_config(self):
-        return self.driver.require_config({
-            'REDIS_URL': {
-                'description': "URI to connect to Redis, like redis://:password@localhost:6379/0 or unix://:password@/path/to/socket.sock?db=0",
-            },
-        })
-
-    def get_flask_plugins(self):
-        return self.driver.get_flask_plugins()
-
-    def init_app(self, app):
-        super().init_app(app)
-        app._cache_driver = self.driver
-
-    # def get_decorators(self):
-    #     return {
-    #         'throttle': self.dec_throttle,
-    #     }
-
-    # def dec_throttle(self, callback, dec_args, dec_kwargs, call_args, call_kwargs):
-    #     # default config - init/multiplier
-    #     # dec kwargs - init/multiplier, + config keys, +methods, +incl route params, +incl query
-    #     # if method match, continue w/ check
-    #     # key: 'throttle', method, route, +hash w/ secret: ip + params as included
-    #     # get key, value is delay
-    #     # delay *= multiplier
-    #     # set key - delay , exp now+delay
-    #     # if value/delay from orig get, abort w/ appropriate method
-    #     # finally callback
-
-    #     # user = None
-    #     # if dec_kwargs.get('current'):
-    #     #     user = event.publish('user.current')
-    #     # else:
-    #     #     user_id = call_kwargs.get(dec_kwargs.get('user_id_key', 'user_id'))
-    #     #     username = call_kwargs.get(dec_kwargs.get('user_name_key', 'username'))
-    #     #     if user_id:
-    #     #         user = User.query.get(user_id)
-    #     #     elif username:
-    #     #         try:
-    #     #             user = User.query.filter(User.username.like(username) | User.email.like(username)).one()
-    #     #         except NoResultFound:
-    #     #             pass
-    #     #         except MultipleResultsFound:
-    #     #             logger.error("Multiple users matching %s", username)
-
-    #     # if not user and dec_kwargs.get('abort_on_missing', True):
-    #     #     abort(404, "No matching user was found")
-
-    #     # call_kwargs = dict(call_kwargs, **{dec_kwargs.get('user_key', 'user'): user})
-    #     return callback(*call_args, **call_kwargs)
 
 
 class MetaPlugin(Plugin):
