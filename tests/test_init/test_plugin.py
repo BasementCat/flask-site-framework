@@ -159,7 +159,7 @@ class TestLoadConfig(TestCase):
         def test_v(v):
             pass
         mock_get_config.return_value = {
-            'FOO': {},
+            'FOO': {'description': 'asdf'},
             'BAR': {'required': True},
             'BAZ': {'parser': int},
             'QUUX': {'parser': float},
@@ -173,6 +173,8 @@ class TestLoadConfig(TestCase):
             'QUUX': '5.6',
             'ASDF': 'lksjdkfls',
         })
+        mock_app._config = 'asdf'
+        del mock_app._config
         p._load_config(mock_app)
         self.assertEqual(mock_app.config, {
             'FOO': 'asdf',
@@ -180,4 +182,41 @@ class TestLoadConfig(TestCase):
             'BAZ': 3,
             'QUUX': 5.6,
             'ASDF': 'lksjdkfls',
+        })
+        self.assertEqual(mock_app._config, {
+            'FOO': {
+                'parser': None,
+                'validator': None,
+                'default': None,
+                'required': False,
+                'description': 'asdf',
+            },
+            'BAR': {
+                'parser': None,
+                'validator': None,
+                'default': None,
+                'required': True,
+                'description': '',
+            },
+            'BAZ': {
+                'parser': int,
+                'validator': None,
+                'default': None,
+                'required': False,
+                'description': '',
+            },
+            'QUUX': {
+                'parser': float,
+                'validator': None,
+                'default': None,
+                'required': False,
+                'description': '',
+            },
+            'ASDF': {
+                'parser': None,
+                'validator': test_v,
+                'default': None,
+                'required': False,
+                'description': '',
+            },
         })

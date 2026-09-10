@@ -10,6 +10,7 @@ arrow = "*"
 bootstrap-flask = "*"
 redis = {extras = ["hiredis"], version = "*"}
 flask-redis = "*"
+tabulate = "*"
 
 [dev-packages]
 

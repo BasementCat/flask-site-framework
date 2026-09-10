@@ -10,7 +10,6 @@ from tabulate import tabulate
 
 
 cli_email = AppGroup('mail')
-cli_config = AppGroup('config')
 
 
 @cli_email.command('test')
@@ -35,19 +34,3 @@ def test_email(email: str, template: Optional[str]):
         current_app.plugins['email'] \
         .create(subject=subject, text_body=body, to=[email]) \
         .send_message()
-
-
-@cli_config.command('list')
-def list_config():
-    structure = {
-        'key': 'Key',
-        'source': 'Source Var',
-        'required': 'Required',
-        'default': 'Default Value',
-        'value': 'Set Value',
-        'description': 'Description',
-    }
-    rows = []
-    for item in current_app.config_loader.list(current_app.config):
-        rows.append([item[k] for k in structure.keys()])
-    print(tabulate(rows, headers=list(structure.values())))

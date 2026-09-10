@@ -25,10 +25,12 @@ import functools
 import tempfile
 import logging
 
+import click
 from flask import Flask, current_app, Blueprint, render_template
 from flask.cli import AppGroup
 from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv
+from tabulate import tabulate
 
 from . import event
 
@@ -116,8 +118,11 @@ class Plugin:
             'required': False,
             'description': '',
         }
+        if not hasattr(app, '_config'):
+            app._config = {}
         for config_key, config_opt in self.get_config().items():
             config_opt = dict(defaults, **config_opt)
+            app._config[config_key] = config_opt
             try:
                 value = app.config[config_key]
             except KeyError:
@@ -137,6 +142,23 @@ class Plugin:
 
             app.config[config_key] = value
 
+cli_config = AppGroup('config')
+
+@cli_config.command('list')
+def list_config():
+    structure = {
+        'key': 'Key',
+        'required': 'Required',
+        'default': 'Default Value',
+        'value': 'Set Value',
+        'description': 'Description',
+    }
+    rows = []
+    for k, v in getattr(current_app, '_config', {}).items():
+        v = dict(v, key=k, value=current_app.config.get(k))
+        rows.append([v[k] for k in structure.keys()])
+    print(tabulate(rows, headers=list(structure.values())))
+
 
 class FlaskConfigPlugin(Plugin):
     """\
@@ -146,8 +168,8 @@ class FlaskConfigPlugin(Plugin):
     """
 
     def __init__(self, app: Optional[Flask]=None, url_prefix: Optional[str]=None, env_prefix: str = 'FLASK'):
-        super().__init__(app=app, url_prefix=url_prefix)
         self.env_prefix = env_prefix
+        super().__init__(app=app, url_prefix=url_prefix)
 
     def get_config(self) -> Dict[str, Dict[str, Any]]:
         return {
@@ -268,6 +290,9 @@ class FlaskConfigPlugin(Plugin):
                 'description': "Warn if cookie headers are larger than this many bytes.",
             },
         }
+
+    def get_commands(self) -> Iterable[AppGroup]:
+        return [cli_config]
 
     def init_app(self, app: Flask):
         load_dotenv()

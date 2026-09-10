@@ -1,7 +1,35 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from src.flask_site_framework import FlaskConfigPlugin
+from flask import Flask
+
+from src.flask_site_framework import FlaskConfigPlugin, list_config, cli_config
+
+
+@patch('src.flask_site_framework.tabulate')
+class TestListConfig(TestCase):
+    def test_list_config(self, mock_tabulate):
+        # Prevent errant data from being printed
+        mock_tabulate.return_value = ''
+        app = Flask(__name__)
+        # Prevent loading actual config here otherwise it will fail
+        with patch('src.flask_site_framework.FlaskConfigPlugin.init_app'):
+            p = FlaskConfigPlugin(app)
+        with app.app_context(), app.test_request_context():
+            app._config = {
+                'FOO': {
+                    'default': 'bar',
+                    'required': True,
+                    'description': 'asdf',
+                }
+            }
+            app.config = {'FOO': 'baz'}
+            with self.assertRaises(SystemExit):
+                list_config()
+            mock_tabulate.assert_called_once_with(
+                [['FOO', True, 'bar', 'baz', 'asdf']],
+                headers=['Key', 'Required', 'Default Value', 'Set Value', 'Description']
+            )
 
 
 @patch('src.flask_site_framework.Plugin.__init__')
@@ -21,6 +49,12 @@ class TestGetConfig(TestCase):
     def test_value_returned(self):
         p = FlaskConfigPlugin()
         self.assertGreater(len(p.get_config()), 0)
+
+
+class TestGetCommands(TestCase):
+    def test_get_commands(self):
+        p = FlaskConfigPlugin()
+        self.assertEqual(p.get_commands(), [cli_config])
 
 
 @patch('src.flask_site_framework.load_dotenv')
