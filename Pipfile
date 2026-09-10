@@ -11,6 +11,8 @@ bootstrap-flask = "*"
 redis = {extras = ["hiredis"], version = "*"}
 flask-redis = "*"
 tabulate = "*"
+flask-mail = "*"
+markdown = "*"
 
 [dev-packages]
 
