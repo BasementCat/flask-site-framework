@@ -1,4 +1,36 @@
-"""Database functionality"""
+"""Database functionality
+
+Initialization:
+
+    from flask_site_framework.database import db, migrate
+
+    def create_app():
+        [...]
+        db.init_app(app)
+        migrate.init_app(app)
+        [...]
+        return app
+
+For models:
+
+    from flask_site_framework.database import db
+
+    class MyModel(db.Model):
+        [...]
+
+Ensure all models are imported in your create_app function, and use the usual
+commands to setup & generate migrations.
+
+Setup:
+
+* flask db init
+* flask database init
+
+Migrations:
+
+* flask db migrate
+* flask db upgrade
+"""
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -7,8 +39,8 @@ from alembic import context
 from alembic.autogenerate import rewriter
 from alembic.operations import ops
 
-from bc_fsf_base import Plugin
-from bc_fsf_base import event
+from .. import Plugin
+from .. import event
 
 from . import db_types
 

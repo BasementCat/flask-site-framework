@@ -1,5 +1,6 @@
 """Database commands"""
 
+from typing import Optional
 import os, sys, re
 
 import click
@@ -11,17 +12,23 @@ cli = AppGroup('database')
 MARKER = '9ec5e472d35c'
 
 
+# separated out some functions for easier unit testing
+def _make_migrations_env_path(path: Optional[str]):
+    path = path or 'migrations'
+    if not path.startswith('/'):
+        path = os.path.join(current_app.root_path, '..', path)
+    path = os.path.abspath(os.path.normpath(os.path.expanduser(os.path.join(path, 'env.py'))))
+    return path, os.path.exists(path)
+
+
 @cli.command('init')
 @click.option('-p', '--path', help="Path to Alembic migrations folder, relative to the application root path or an absolute path (default is 'migrations' relative to root path)")
 def database_init(path: str):
     """\
     Custom database initialization, to be run after `flask db init`
     """
-    path = path or 'migrations'
-    if not path.startswith('/'):
-        path = os.path.join(current_app.root_path, '..', path)
-    path = os.path.abspath(os.path.normpath(os.path.expanduser(os.path.join(path, 'env.py'))))
-    if not os.path.exists(path):
+    path, exists = _make_migrations_env_path(path)
+    if not exists:
         sys.stderr.write(f"Cannot find env file at {path} - run `flask db init` first\n")
         sys.exit(1)
 
@@ -34,7 +41,7 @@ def database_init(path: str):
         template = fp.read()
 
     template = template.replace('{{MARKER}}', MARKER)
-    template = template.replace('{{MODULE}}', current_app.base_plugin_module)
+    template = template.replace('{{MODULE}}', 'flask_site_framework')
 
     with open(path, 'w') as fp:
         fp.write(template)
