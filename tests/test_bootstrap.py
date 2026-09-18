@@ -4,10 +4,10 @@ from unittest.mock import patch, MagicMock
 from flask import Flask
 from flask_bootstrap import Bootstrap4, Bootstrap5
 
-from src.flask_site_framework import bootstrap as bs
+from flask_site_framework import bootstrap as bs
 
 
-@patch('src.flask_site_framework.Plugin.__init__')
+@patch('flask_site_framework.Plugin.__init__')
 class TestBootstrapPlugin_Init(TestCase):
     def test_defaults(self, mock_super_init):
         p = bs.BootstrapPlugin()
@@ -52,13 +52,13 @@ class TestBootstrapPlugin_GetBlueprints(TestCase):
         self.assertEqual(len(res), 1)
         self.assertIsNone(res[0][0])
         self.assertEqual(res[0][1].name, '_base_bs')
-        self.assertEqual(res[0][1].import_name, 'src.flask_site_framework.bootstrap')
+        self.assertEqual(res[0][1].import_name, 'flask_site_framework.bootstrap')
         self.assertEqual(res[0][1].url_prefix, '/fsf/bs')
         self.assertTrue(res[0][1].static_folder.endswith('/flask_site_framework/static'))
         self.assertEqual(res[0][1].template_folder, 'templates')
 
 
-@patch('src.flask_site_framework.bootstrap.url_for', return_value='foo')
+@patch('flask_site_framework.bootstrap.url_for', return_value='foo')
 class TestBootstrapPlugin_GetFontawesomeStylesheet(TestCase):
     def test_no_with_fa(self, mock_url_for):
         app = Flask(__name__)
@@ -102,8 +102,8 @@ class TestBootstrapPlugin_GetFontawesomeStylesheet(TestCase):
             self.assertEqual(res, ['<link rel="stylesheet" href="foo">'])
 
 
-@patch('src.flask_site_framework.Plugin.init_app')
-@patch('src.flask_site_framework.bootstrap.subscribe')
+@patch('flask_site_framework.Plugin.init_app')
+@patch('flask_site_framework.bootstrap.subscribe')
 class TestBootstrapPlugin_InitApp(TestCase):
     def test_default(self, mock_sub, mock_init_app):
         mock_app = MagicMock()
@@ -130,7 +130,7 @@ class TestFontawesomeHelpers_Base(TestCase):
         self.assertEqual(res, '<span class="far fa-foo bar"></span>')
 
 
-@patch('src.flask_site_framework.bootstrap.fa')
+@patch('flask_site_framework.bootstrap.fa')
 class TestFontawesomeHelpers_Other(TestCase):
     def test_fas_defaults(self, mock_fa):
         res = bs.fas('foo')

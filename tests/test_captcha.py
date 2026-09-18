@@ -5,7 +5,7 @@ import json, base64
 from flask import Flask, g
 import arrow
 
-from src.flask_site_framework.captcha import bp_captcha, CaptchaDriver, AltchaCaptchaDriver, challenge, CaptchaPlugin, validate_captcha, captcha
+from flask_site_framework.captcha import bp_captcha, CaptchaDriver, AltchaCaptchaDriver, challenge, CaptchaPlugin, validate_captcha, captcha
 
 
 class TestAltchaCaptchaDriver_GetScripts(TestCase):
@@ -14,9 +14,9 @@ class TestAltchaCaptchaDriver_GetScripts(TestCase):
         self.assertEqual(d.get_scripts(), ['<script async defer src="https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js" type="module"></script>'])
 
 
-@patch('src.flask_site_framework.captcha.arrow.utcnow', return_value=arrow.get('2026-09-10 08:00:00'))
-@patch('src.flask_site_framework.captcha.ChallengeOptionsV1')
-@patch('src.flask_site_framework.captcha.create_challenge', return_value=MagicMock(algorithm='algo', challenge='chal', salt='salt', signature='sig'))
+@patch('flask_site_framework.captcha.arrow.utcnow', return_value=arrow.get('2026-09-10 08:00:00'))
+@patch('flask_site_framework.captcha.ChallengeOptionsV1')
+@patch('flask_site_framework.captcha.create_challenge', return_value=MagicMock(algorithm='algo', challenge='chal', salt='salt', signature='sig'))
 class TestAltchaCaptchaDriver_Challenge(TestCase):
     def test_default(self, mock_create_challenge, mock_challenge_options, mock_utcnow):
         app = Flask(__name__)
@@ -69,8 +69,8 @@ class TestAltchaCaptchaDriver_Challenge(TestCase):
             })
 
 
-@patch('src.flask_site_framework.captcha.AltchaCaptchaDriver.challenge', return_value={'foo': 'bar'})
-@patch('src.flask_site_framework.captcha.url_for', return_value='testurl')
+@patch('flask_site_framework.captcha.AltchaCaptchaDriver.challenge', return_value={'foo': 'bar'})
+@patch('flask_site_framework.captcha.url_for', return_value='testurl')
 class TestAltchaCaptchaDriver_Render(TestCase):
     maxDiff = None
 
@@ -112,8 +112,8 @@ class TestAltchaCaptchaDriver_Render(TestCase):
             self.assertEqual(res, '<altcha-widget auto="true" delay="60000" expire="120000" hidefooter="true" hidelogo="true" name="testfield" refetchonexpire="true" maxnumber="3" challengejson="{\"foo\": \"bar\"}"></altcha-widget>')
 
 
-@patch('src.flask_site_framework.captcha.verify_solution', return_value=(True, None))
-@patch('src.flask_site_framework.captcha.extract_params_v1')
+@patch('flask_site_framework.captcha.verify_solution', return_value=(True, None))
+@patch('flask_site_framework.captcha.extract_params_v1')
 class TestAltchaCaptchaDriver_Verify(TestCase):
     def test_no_payload__no_data(self, mock_extract_params, mock_verify_solution):
         app = Flask(__name__)
@@ -197,7 +197,7 @@ class TestAltchaCaptchaDriver_Verify(TestCase):
             mock_extract_params.assert_called_once_with({'foo': 'bar'})
 
 
-@patch('src.flask_site_framework.captcha.jsonify')
+@patch('flask_site_framework.captcha.jsonify')
 class TestChallengeRoute(TestCase):
     def test_no_plugin(self, mock_jsonify):
         app = Flask(__name__)
@@ -224,7 +224,7 @@ class TestChallengeRoute(TestCase):
             self.assertEqual(res, mock_jsonify.return_value)
 
 
-@patch('src.flask_site_framework.captcha.AltchaCaptchaDriver')
+@patch('flask_site_framework.captcha.AltchaCaptchaDriver')
 class TestCaptchaPlugin_Init(TestCase):
     def test_no_driver(self, mock_altcha_driver):
         p = CaptchaPlugin()
@@ -249,8 +249,8 @@ class TestCaptchaPlugin_GetBlueprints(TestCase):
         self.assertEqual(p.get_blueprints(), [('/captcha', bp_captcha)])
 
 
-@patch('src.flask_site_framework.Plugin.init_app')
-@patch('src.flask_site_framework.captcha.subscribe')
+@patch('flask_site_framework.Plugin.init_app')
+@patch('flask_site_framework.captcha.subscribe')
 class TestCaptchaPlugin_InitApp(TestCase):
     def test_init_app(self, mock_subscribe, mock_super_init_app):
         p = CaptchaPlugin()
@@ -385,9 +385,9 @@ class TestCaptchaPlugin_GetCaptcha(TestCase):
             self.assertEqual(g.uses_captcha, True)
 
 
-@patch('src.flask_site_framework.captcha.abort', side_effect=RuntimeError('testerror'))
-@patch('src.flask_site_framework.captcha.flash')
-@patch('src.flask_site_framework.captcha.redirect')
+@patch('flask_site_framework.captcha.abort', side_effect=RuntimeError('testerror'))
+@patch('flask_site_framework.captcha.flash')
+@patch('flask_site_framework.captcha.redirect')
 class TestValidateCaptchaDecorator(TestCase):
     def test_no_plugin(self, mock_redirect, mock_flash, mock_abort):
         app = Flask(__name__)
@@ -464,7 +464,7 @@ class TestValidateCaptchaDecorator(TestCase):
             self.assertEqual(res, testfn.return_value)
 
 
-@patch('src.flask_site_framework.captcha.CaptchaPlugin.get_captcha')
+@patch('flask_site_framework.captcha.CaptchaPlugin.get_captcha')
 class TestCaptchaJinjaGlobal(TestCase):
     def test_no_plugin(self, mock_get_captcha):
         app = Flask(__name__)

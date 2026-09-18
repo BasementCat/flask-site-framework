@@ -5,10 +5,10 @@ from flask import Flask
 import arrow
 from jinja2.exceptions import TemplateNotFound
 
-from src.flask_site_framework.email import cli_email, test_email, EmailMessage, EmailPlugin
+from flask_site_framework.email import cli_email, test_email, EmailMessage, EmailPlugin
 
 
-@patch('src.flask_site_framework.email.arrow.utcnow', return_value=arrow.get('2026-09-10 08:00:00'))
+@patch('flask_site_framework.email.arrow.utcnow', return_value=arrow.get('2026-09-10 08:00:00'))
 class TestTestEmailCommand(TestCase):
     def test_send(self, mock_utcnow):
         app = Flask(__name__)
@@ -44,7 +44,7 @@ class TestTestEmailCommand(TestCase):
             mock_email.create.return_value.render.return_value.send_message.assert_called_once_with()
 
 
-@patch('src.flask_site_framework.email.Message.__init__')
+@patch('flask_site_framework.email.Message.__init__')
 class TestEmailMessage_Init(TestCase):
     def test_init(self, mock_super_init):
         m = EmailMessage('plugin', 'foo', bar='baz')
@@ -52,7 +52,7 @@ class TestEmailMessage_Init(TestCase):
         mock_super_init.assert_called_once_with('foo', bar='baz')
 
 
-@patch('src.flask_site_framework.email.render_template')
+@patch('flask_site_framework.email.render_template')
 class TestEmailMessage_RenderCandidate(TestCase):
     def test_render_not_found(self, mock_render_template):
         mock_render_template.side_effect = TemplateNotFound('tpl')
@@ -86,10 +86,10 @@ class TestEmailMessage_RenderCandidate(TestCase):
         ])
 
 
-@patch('src.flask_site_framework.email.Message.html')
-@patch('src.flask_site_framework.email.Message.__init__')
-@patch('src.flask_site_framework.email.EmailMessage._render_candidate')
-@patch('src.flask_site_framework.email.markdown')
+@patch('flask_site_framework.email.Message.html')
+@patch('flask_site_framework.email.Message.__init__')
+@patch('flask_site_framework.email.EmailMessage._render_candidate')
+@patch('flask_site_framework.email.markdown')
 class TestEmailMessage_Render(TestCase):
     def test_render_not_found(self, mock_markdown, mock_render_candidate, mock_msg_init, mock_msg_html):
         mock_render_candidate.return_value = None
@@ -158,8 +158,8 @@ class TestEmailMessage_Render(TestCase):
         self.assertEqual(m.html, 'htmlbody')
 
 
-@patch('src.flask_site_framework.email.Message.html')
-@patch('src.flask_site_framework.email.Message.__init__')
+@patch('flask_site_framework.email.Message.html')
+@patch('flask_site_framework.email.Message.__init__')
 class TestEmailMessage_SendMessage(TestCase):
     def test_send_no_text_or_html(self, mock_msg_init, mock_msg_html):
         mock_plugin = MagicMock()
@@ -213,7 +213,7 @@ class TestEmailPlugin_GetConfig(TestCase):
         self.assertGreater(len(p.get_config()), 0)
 
 
-@patch('src.flask_site_framework.email.Mail')
+@patch('flask_site_framework.email.Mail')
 class TestEmailPlugin_GetFlaskPlugins(TestCase):
     def test_get_flask_plugins(self, mock_mail):
         p = EmailPlugin()
@@ -228,7 +228,7 @@ class TestEmailPlugin_GetCommands(TestCase):
         res = p.get_commands()
         self.assertEqual(res, [cli_email])
 
-@patch('src.flask_site_framework.email.EmailMessage')
+@patch('flask_site_framework.email.EmailMessage')
 class TestEmailPlugin_Create(TestCase):
     def test_create_no_args(self, mock_msg):
         p = EmailPlugin()

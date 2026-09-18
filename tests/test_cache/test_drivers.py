@@ -6,7 +6,7 @@ import pickle
 
 from flask import Flask
 
-from src.flask_site_framework import cache
+from flask_site_framework import cache
 
 
 class TestMemoryCacheDriver(TestCase):
@@ -41,7 +41,7 @@ class TestMemoryCacheDriver(TestCase):
         self.assertFalse(d.contains('foo'))
 
 
-@patch('src.flask_site_framework.cache.FlaskRedis')
+@patch('flask_site_framework.cache.FlaskRedis')
 class TestRedisCacheDriver(TestCase):
     def test_require_config(self, mock_fr):
         config = {'REDIS_URL': {}}
@@ -85,7 +85,7 @@ class TestRedisCacheDriver(TestCase):
         mock_fr.return_value.get.assert_called_once_with('foo')
 
     def test_delete_nx(self, mock_fr):
-        with patch('src.flask_site_framework.cache.RedisCacheDriver.contains', return_value=0) as mock_contains:
+        with patch('flask_site_framework.cache.RedisCacheDriver.contains', return_value=0) as mock_contains:
             d = cache.RedisCacheDriver()
             d.get_flask_plugins()
             with self.assertRaises(KeyError):
@@ -94,7 +94,7 @@ class TestRedisCacheDriver(TestCase):
             mock_contains.assert_called_once_with('foo')
 
     def test_delete_exists(self, mock_fr):
-        with patch('src.flask_site_framework.cache.RedisCacheDriver.contains', return_value=1) as mock_contains:
+        with patch('flask_site_framework.cache.RedisCacheDriver.contains', return_value=1) as mock_contains:
             d = cache.RedisCacheDriver()
             d.get_flask_plugins()
             d.delete('foo')

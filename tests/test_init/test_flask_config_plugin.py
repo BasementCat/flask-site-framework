@@ -3,17 +3,17 @@ from unittest.mock import patch, MagicMock
 
 from flask import Flask
 
-from src.flask_site_framework import FlaskConfigPlugin, list_config, cli_config
+from flask_site_framework import FlaskConfigPlugin, list_config, cli_config
 
 
-@patch('src.flask_site_framework.tabulate')
+@patch('flask_site_framework.tabulate')
 class TestListConfig(TestCase):
     def test_list_config(self, mock_tabulate):
         # Prevent errant data from being printed
         mock_tabulate.return_value = ''
         app = Flask(__name__)
         # Prevent loading actual config here otherwise it will fail
-        with patch('src.flask_site_framework.FlaskConfigPlugin.init_app'):
+        with patch('flask_site_framework.FlaskConfigPlugin.init_app'):
             p = FlaskConfigPlugin(app)
         with app.app_context(), app.test_request_context():
             app._config = {
@@ -32,7 +32,7 @@ class TestListConfig(TestCase):
             )
 
 
-@patch('src.flask_site_framework.Plugin.__init__')
+@patch('flask_site_framework.Plugin.__init__')
 class TestInit(TestCase):
     def test_super_called(self, mock_super_init):
         p = FlaskConfigPlugin()
@@ -57,8 +57,8 @@ class TestGetCommands(TestCase):
         self.assertEqual(p.get_commands(), [cli_config])
 
 
-@patch('src.flask_site_framework.load_dotenv')
-@patch('src.flask_site_framework.Plugin.init_app')
+@patch('flask_site_framework.load_dotenv')
+@patch('flask_site_framework.Plugin.init_app')
 class TestInitApp(TestCase):
     def test_calls(self, mock_init_app, mock_load_dotenv):
         p = FlaskConfigPlugin()

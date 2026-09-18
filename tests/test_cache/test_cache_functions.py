@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 
 from flask import Flask
 
-from src.flask_site_framework import cache
+from flask_site_framework import cache
 
 
 class TestWithDriverDecorator(TestCase):
@@ -40,7 +40,7 @@ class TestSet(TestCase):
 
     def test_expires_in(self):
         app = Flask(__name__)
-        with app.app_context(), app.test_request_context(), patch('src.flask_site_framework.cache.time.time', return_value=100):
+        with app.app_context(), app.test_request_context(), patch('flask_site_framework.cache.time.time', return_value=100):
             driver = app._cache_driver = MagicMock()
             cache.set('foo', 'bar', expires_in=3)
             driver.set.assert_called_once_with('foo', 'bar', expires_at=103)
@@ -54,7 +54,7 @@ class TestSet(TestCase):
 
     def test_expires_in_preferred(self):
         app = Flask(__name__)
-        with app.app_context(), app.test_request_context(), patch('src.flask_site_framework.cache.time.time', return_value=100):
+        with app.app_context(), app.test_request_context(), patch('flask_site_framework.cache.time.time', return_value=100):
             driver = app._cache_driver = MagicMock()
             cache.set('foo', 'bar', expires_in=3, expires_at=5)
             driver.set.assert_called_once_with('foo', 'bar', expires_at=103)
@@ -167,8 +167,8 @@ class TestContains(TestCase):
             driver.get.assert_called_once_with('foo')
 
 
-@patch('src.flask_site_framework.cache.get')
-@patch('src.flask_site_framework.cache.set')
+@patch('flask_site_framework.cache.get')
+@patch('flask_site_framework.cache.set')
 class TestGetOrFetch(TestCase):
     def test_no_driver_set(self, mock_set, mock_get):
         app = Flask(__name__)
@@ -209,7 +209,7 @@ class TestGetOrFetch(TestCase):
             mock_set.assert_called_once_with('foo', 'bar', expires_in=5, expires_at=3)
 
 
-@patch('src.flask_site_framework.cache.hashlib')
+@patch('flask_site_framework.cache.hashlib')
 class TestMakeKey(TestCase):
     def test_no_args(self, mock_hl):
         mock_hl.new.return_value.hexdigest.return_value = 'asdf'

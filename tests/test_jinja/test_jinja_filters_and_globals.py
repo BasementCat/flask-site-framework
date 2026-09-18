@@ -5,8 +5,8 @@ import math
 from flask import Flask, request
 import arrow
 
-from src.flask_site_framework import jinja
-from src.flask_site_framework.event import publish
+from flask_site_framework import jinja
+from flask_site_framework.event import publish
 
 
 class TestDefaults(TestCase):
@@ -57,14 +57,14 @@ class TestRouteMatches(TestCase):
             self.assertFalse(jinja.route_matches('test.endpoint', foo='bar', baz='asdf'))
 
 
-@patch('src.flask_site_framework.jinja.arrow.utcnow')
+@patch('flask_site_framework.jinja.arrow.utcnow')
 class TestNow(TestCase):
     def test_now(self, mock_utcnow):
         res = jinja.now()
         self.assertEqual(res, mock_utcnow.return_value)
 
 
-@patch('src.flask_site_framework.jinja.event.publish', side_effect=lambda e, v: v)
+@patch('flask_site_framework.jinja.event.publish', side_effect=lambda e, v: v)
 class TestDT(TestCase):
     def test_full_fmt__all(self, mock_publish):
         app = Flask(__name__)

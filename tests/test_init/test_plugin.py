@@ -1,10 +1,10 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from src.flask_site_framework import Plugin
+from flask_site_framework import Plugin
 
 
-@patch('src.flask_site_framework.Plugin.init_app')
+@patch('flask_site_framework.Plugin.init_app')
 class TestInit(TestCase):
     def test_init__no_args(self, mock_init_app):
         p = Plugin()
@@ -17,10 +17,10 @@ class TestInit(TestCase):
         mock_init_app.assert_called_once_with('foo')
 
 
-@patch('src.flask_site_framework.Plugin.get_flask_plugins', return_value=[])
-@patch('src.flask_site_framework.Plugin.get_blueprints', return_value=[])
-@patch('src.flask_site_framework.Plugin.get_commands', return_value=[])
-@patch('src.flask_site_framework.Plugin._load_config')
+@patch('flask_site_framework.Plugin.get_flask_plugins', return_value=[])
+@patch('flask_site_framework.Plugin.get_blueprints', return_value=[])
+@patch('flask_site_framework.Plugin.get_commands', return_value=[])
+@patch('flask_site_framework.Plugin._load_config')
 class TestInitApp(TestCase):
     def test_nothing_to_do(self, mock_load_config, mock_get_commands, mock_get_blueprints, mock_get_plugins):
         mock_app = MagicMock()
@@ -63,7 +63,7 @@ class TestInitApp(TestCase):
         mock_app.cli.add_command.assert_called_once_with('group')
 
 
-@patch('src.flask_site_framework.Plugin.get_config', return_value={})
+@patch('flask_site_framework.Plugin.get_config', return_value={})
 class TestLoadConfig(TestCase):
     def test_no_config(self, mock_get_config):
         p = Plugin()

@@ -1,16 +1,16 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from src.flask_site_framework.jinja import JinjaPlugin, jinja_filter, jinja_global
-from src.flask_site_framework import jinja
+from flask_site_framework.jinja import JinjaPlugin, jinja_filter, jinja_global
+from flask_site_framework import jinja
 
 
-@patch('src.flask_site_framework.Plugin.init_app')
+@patch('flask_site_framework.Plugin.init_app')
 class TestJinjaPlugin_InitApp(TestCase):
     def test_init_app(self, mock_super_init_app):
         mock_app = MagicMock()
         p = JinjaPlugin()
-        with patch('src.flask_site_framework.jinja.bool') as mock_bool:
+        with patch('flask_site_framework.jinja.bool') as mock_bool:
             p.init_app(mock_app)
             mock_super_init_app.assert_called_once_with(mock_app)
             mock_app.jinja_env.filters.update.assert_called_once_with(jinja.jinja_data['filters'])
@@ -20,7 +20,7 @@ class TestJinjaPlugin_InitApp(TestCase):
             self.assertEqual(mock_app.jinja_env.auto_reload, mock_bool.return_value)
 
 
-@patch('src.flask_site_framework.jinja.jinja_data', {'filters': {}, 'globals': {}})
+@patch('flask_site_framework.jinja.jinja_data', {'filters': {}, 'globals': {}})
 class TestJinjaFilter(TestCase):
     def test_without_name(self):
         def mock_fn():pass
@@ -33,7 +33,7 @@ class TestJinjaFilter(TestCase):
         self.assertEqual(jinja.jinja_data['filters']['test'], mock_fn)
 
 
-@patch('src.flask_site_framework.jinja.jinja_data', {'filters': {}, 'globals': {}})
+@patch('flask_site_framework.jinja.jinja_data', {'filters': {}, 'globals': {}})
 class TestJinjaGlobal(TestCase):
     def test_without_name(self):
         def mock_fn():pass

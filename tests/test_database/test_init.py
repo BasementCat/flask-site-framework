@@ -5,8 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from alembic.operations import ops
 
-from src.flask_site_framework import database as db
-from src.flask_site_framework.database import commands
+from flask_site_framework import database as db
+from flask_site_framework.database import commands
 
 
 class TestPluginsCreated(TestCase):
@@ -38,7 +38,7 @@ class TestConfigureAlembicRuntime(TestCase):
         rewrite_fns = []
         def capture_rewrite_fn(callback):
             rewrite_fns.append(callback)
-        with patch('src.flask_site_framework.database.rewriter.Rewriter') as mock_rewriter:
+        with patch('flask_site_framework.database.rewriter.Rewriter') as mock_rewriter:
             mock_rewriter.return_value.rewrites.return_value.side_effect = capture_rewrite_fn
             config = {}
             res = db.configure_alembic_runtime('test', config)
@@ -53,7 +53,7 @@ class TestConfigureAlembicRuntime(TestCase):
             self.assertEqual(len(rewrite_fns), 1)
             mock_op = MagicMock()
             res = rewrite_fns[0]('ctx', 'rev', mock_op)
-            mock_op.imports.add.assert_called_once_with('import src.flask_site_framework.database.db_types as custom_types')
+            mock_op.imports.add.assert_called_once_with('import flask_site_framework.database.db_types as custom_types')
             self.assertEqual(res, [mock_op])
 
 

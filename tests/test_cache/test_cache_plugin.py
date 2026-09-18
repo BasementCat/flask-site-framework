@@ -1,11 +1,11 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock, ANY
 
-from src.flask_site_framework import cache
+from flask_site_framework import cache
 
 
-@patch('src.flask_site_framework.Plugin.__init__')
-@patch('src.flask_site_framework.cache.MemoryCacheDriver')
+@patch('flask_site_framework.Plugin.__init__')
+@patch('flask_site_framework.cache.MemoryCacheDriver')
 class TestCachePlugin_Init(TestCase):
     def test_init_no_driver(self, mock_mcd, mock_super_init):
         p = cache.CachePlugin()
@@ -38,7 +38,7 @@ class TestCachePlugin_GetFlaskPlugins(TestCase):
         driver.get_flask_plugins.assert_called_once_with()
 
 
-@patch('src.flask_site_framework.Plugin.init_app')
+@patch('flask_site_framework.Plugin.init_app')
 class TestCachePlugin_InitApp(TestCase):
     def test_init_app(self, mock_super_init_app):
         driver = MagicMock()

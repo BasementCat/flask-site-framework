@@ -5,10 +5,10 @@ import os
 
 from flask import Flask
 
-from src.flask_site_framework.database import commands as cmd
+from flask_site_framework.database import commands as cmd
 
 
-@patch('src.flask_site_framework.database.commands.os.path.exists')
+@patch('flask_site_framework.database.commands.os.path.exists')
 class TestMakeMigrationsEnvPath(TestCase):
     def test_no_path(self, mock_exists):
         app = Flask(__name__)
@@ -40,10 +40,10 @@ class TestMakeMigrationsEnvPath(TestCase):
 
 
 
-@patch('src.flask_site_framework.database.commands._make_migrations_env_path')
-@patch('src.flask_site_framework.database.commands.sys.stderr')
-@patch('src.flask_site_framework.database.commands.open')
-@patch('src.flask_site_framework.database.commands.print')
+@patch('flask_site_framework.database.commands._make_migrations_env_path')
+@patch('flask_site_framework.database.commands.sys.stderr')
+@patch('flask_site_framework.database.commands.open')
+@patch('flask_site_framework.database.commands.print')
 class TestDatabaseInit(TestCase):
     def test_path_does_not_exist(self, mock_print, mock_open, mock_stderr, mock_mk_path):
         app = Flask(__name__)

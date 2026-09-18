@@ -1,11 +1,11 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from src.flask_site_framework.event import subscribe, subscribes_to, publish
-from src.flask_site_framework import event
+from flask_site_framework.event import subscribe, subscribes_to, publish
+from flask_site_framework import event
 
 
-@patch('src.flask_site_framework.event.event_callbacks', {})
+@patch('flask_site_framework.event.event_callbacks', {})
 class TestSubscribe(TestCase):
     def test_default_priority(self):
         def test_fn1():pass
@@ -22,7 +22,7 @@ class TestSubscribe(TestCase):
         self.assertEqual(event.event_callbacks['foo'][200], [test_fn1, test_fn2])
 
 
-@patch('src.flask_site_framework.event.subscribe')
+@patch('flask_site_framework.event.subscribe')
 class TestSubscribesTo(TestCase):
     def test_default_priority(self, mock_subscribe):
         def test_fn():pass
@@ -37,7 +37,7 @@ class TestSubscribesTo(TestCase):
         self.assertTrue(res is test_fn)
 
 
-@patch.dict('src.flask_site_framework.event.event_callbacks', clear=True)
+@patch.dict('flask_site_framework.event.event_callbacks', clear=True)
 class TestPublish(TestCase):
     def test_no_args(self):
         calls = []

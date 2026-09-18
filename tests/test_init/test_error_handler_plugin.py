@@ -3,10 +3,10 @@ from unittest.mock import patch, MagicMock, call
 
 from werkzeug.exceptions import HTTPException, NotFound
 
-from src.flask_site_framework import ErrorHandlerPlugin
+from flask_site_framework import ErrorHandlerPlugin
 
 
-@patch('src.flask_site_framework.Plugin.__init__')
+@patch('flask_site_framework.Plugin.__init__')
 class TestInit(TestCase):
     def test_no_args(self, mock_super_init):
         p = ErrorHandlerPlugin()
@@ -22,7 +22,7 @@ class TestInit(TestCase):
 class TestRegisterErrorHandler(TestCase):
     def test_register(self):
         eh = {'*': 'dfl'}
-        with patch('src.flask_site_framework.ErrorHandlerPlugin.error_handlers', eh):
+        with patch('flask_site_framework.ErrorHandlerPlugin.error_handlers', eh):
             ErrorHandlerPlugin.register_error_handler(TypeError, 'foo')
             ErrorHandlerPlugin.register_error_handler(ValueError, 'bar')
             ErrorHandlerPlugin.register_error_handler(ValueError, 'baz')
@@ -39,8 +39,8 @@ class TestRegisterErrorHandler(TestCase):
             })
 
 
-@patch('src.flask_site_framework.logger')
-@patch('src.flask_site_framework.render_template')
+@patch('flask_site_framework.logger')
+@patch('flask_site_framework.render_template')
 class TestTemplateErrorHandler(TestCase):
     def test_with_httpexc(self, mock_render_tpl, mock_logger):
         e = NotFound()
@@ -69,7 +69,7 @@ class TestTemplateErrorHandler(TestCase):
         self.assertEqual(res, (mock_render_tpl.return_value, 500))
 
 
-@patch('src.flask_site_framework.ErrorHandlerPlugin._template_error_handler')
+@patch('flask_site_framework.ErrorHandlerPlugin._template_error_handler')
 class TestMakeTemplateErrorHandler(TestCase):
     def test_make_tpl_handler(self, mock_tpl_handler):
         res = ErrorHandlerPlugin._make_template_error_handler('foo')
@@ -99,8 +99,8 @@ class TestParseErrspec(TestCase):
         self.assertEqual(list(res), [401, 501])
 
 
-@patch('src.flask_site_framework.ErrorHandlerPlugin._make_template_error_handler')
-@patch('src.flask_site_framework.ErrorHandlerPlugin._parse_errspec', side_effect=lambda v: [1,v])
+@patch('flask_site_framework.ErrorHandlerPlugin._make_template_error_handler')
+@patch('flask_site_framework.ErrorHandlerPlugin._parse_errspec', side_effect=lambda v: [1,v])
 class TestRegisterErrorHandlers(TestCase):
     def test_register(self, mock_parse_errspec, mock_mk_tpl_ehdr):
         mock_app = MagicMock()
@@ -117,7 +117,7 @@ class TestRegisterErrorHandlers(TestCase):
             402: 'invalid',
             403: 'asdf',
         }
-        with patch('src.flask_site_framework.ErrorHandlerPlugin.error_handlers', handlers):
+        with patch('flask_site_framework.ErrorHandlerPlugin.error_handlers', handlers):
             p._register_error_handlers(mock_app)
             mock_mk_tpl_ehdr.assert_has_calls([
                 call('base/error.html.j2'),
@@ -142,8 +142,8 @@ class TestRegisterErrorHandlers(TestCase):
             ])
 
 
-@patch('src.flask_site_framework.Plugin.init_app')
-@patch('src.flask_site_framework.ErrorHandlerPlugin._register_error_handlers')
+@patch('flask_site_framework.Plugin.init_app')
+@patch('flask_site_framework.ErrorHandlerPlugin._register_error_handlers')
 class TestInitApp(TestCase):
     def test_init(self, mock_reg, mock_init):
         mock_app = MagicMock()
