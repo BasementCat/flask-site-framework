@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["version"]
+name = "flask_site_framework"
+dependencies = [
+    "flask",
+    "dotenv",
+    "arrow",
+    "bootstrap-flask",
+    "redis[hiredis]",
+    "flask-redis",
+    "flask-mail",
+    "markdown",
+    "altcha",
+    "sqlalchemy",
+    "flask-sqlalchemy",
+    "pymysql",
+    "flask-migrate",
+    "sqlalchemy-utils",
+    "tabulate",
+    "pyotp",
+    "wtforms",
+    "flask-wtf",
+    "pytz",
+    "qrcode"
+]
+requires-python = ">= 3.8"
+description = "Tools for building a Flask site"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = [
+    "**/*.j2",
+    "**/*.template"
+]
