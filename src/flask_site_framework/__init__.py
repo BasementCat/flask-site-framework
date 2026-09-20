@@ -172,6 +172,12 @@ class FlaskConfigPlugin(Plugin):
         super().__init__(app=app, url_prefix=url_prefix)
 
     def get_config(self) -> Dict[str, Dict[str, Any]]:
+        def int_or_timedelta(v):
+            if hasattr(v, 'total_seconds'):
+                # timedelta; can use as-is
+                return v
+            return int(v)
+
         return {
             'SITE_NAME': {
                 'parser': str,
@@ -239,7 +245,7 @@ class FlaskConfigPlugin(Plugin):
                 'description': "Restrict how cookies are sent with requests from external sites. Can be set to 'Lax' (recommended) or 'Strict'. See Set-Cookie options.",
             },
             'PERMANENT_SESSION_LIFETIME': {
-                'parser': int,
+                'parser': int_or_timedelta,
                 'default': 2678400,
                 'description': "If session.permanent is true, the cookie’s expiration will be set this number of seconds in the future.",
             },
@@ -254,7 +260,7 @@ class FlaskConfigPlugin(Plugin):
                 'description': "When serving files, set the X-Sendfile header instead of serving the data with Flask.",
             },
             'SEND_FILE_MAX_AGE_DEFAULT': {
-                'parser': int,
+                'parser': int_or_timedelta,
                 'description': "When serving files, set the cache control max age to this number of seconds.",
             },
             'SERVER_NAME': {
