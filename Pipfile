@@ -10,7 +10,6 @@ arrow = "*"
 bootstrap-flask = "*"
 redis = {extras = ["hiredis"], version = "*"}
 flask-redis = "*"
-tabulate = "*"
 flask-mail = "*"
 markdown = "*"
 altcha = "*"
@@ -19,6 +18,12 @@ flask-sqlalchemy = "*"
 pymysql = "*"
 flask-migrate = "*"
 sqlalchemy-utils = "*"
+tabulate = "*"
+pyotp = "*"
+wtforms = "*"
+flask-wtf = "*"
+pytz = "*"
+qrcode = "*"
 
 [dev-packages]
 

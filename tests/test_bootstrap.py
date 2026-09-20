@@ -34,7 +34,7 @@ class TestBootstrapPlugin_Init(TestCase):
     def test_invalid_bs_version(self, mock_super_init):
         with self.assertRaises(KeyError):
             p = bs.BootstrapPlugin(bootstrap_version=3)
-        mock_super_init.assert_called_once_with()
+        mock_super_init.assert_not_called()
 
 
 class TestBootstrapPlugin_GetFlaskPlugins(TestCase):

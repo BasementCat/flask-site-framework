@@ -32,9 +32,9 @@ class BootstrapPlugin(Plugin):
         stylesheet to the page (can optionally specify a fontawesome version)
         """
 
-        super().__init__(*args, **kwargs)
         self.with_fontawesome = with_fontawesome
         self.bootstrap_plugin = {4: Bootstrap4, 5: Bootstrap5}[bootstrap_version]
+        super().__init__(*args, **kwargs)
 
     def get_flask_plugins(self):
         return [self.bootstrap_plugin()]

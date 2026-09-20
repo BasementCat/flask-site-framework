@@ -1,5 +1,5 @@
 {% extends 'base.html.j2' %}
-{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap5/utils.html" as utils %}
 
 {% block styles %}
     <style>
@@ -29,7 +29,7 @@
             <div class="col-12 fs-centered">
                 {% block fs_content %}
                     {% if self.title() %}<h1>{% block title %}{% endblock %}</h1>{% endif %}
-                    {{ bootstrap.render_messages() }}
+                    {{ utils.render_messages() }}
                     <div class="panel panel-sm">
                         {% block w_content %}{% endblock %}
                     </div>

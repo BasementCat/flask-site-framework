@@ -1,0 +1,2128 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"asser",
+				"assert_called_once_with"
+			],
+			[
+				"asserr",
+				"assertRaisesRegex"
+			],
+			[
+				"msin",
+				"mock_super_init_app"
+			],
+			[
+				"assert",
+				"assertEqual"
+			],
+			[
+				"current",
+				"current_app"
+			],
+			[
+				"curret",
+				"current_app"
+			],
+			[
+				"bsp",
+				"BootstrapPlugin"
+			],
+			[
+				"boo",
+				"bootstrap_version"
+			],
+			[
+				"moch",
+				"mock_handler"
+			],
+			[
+				"error",
+				"error_handlers"
+			],
+			[
+				"mgp",
+				"mock_get_blueprints"
+			],
+			[
+				"up",
+				"url_prefix"
+			],
+			[
+				"stin",
+				"status__in"
+			],
+			[
+				"User",
+				"UserAuditPage"
+			],
+			[
+				"adqa",
+				"add_query_arg"
+			],
+			[
+				"lineup",
+				"lineup_pending"
+			],
+			[
+				"base",
+				"base64_decode"
+			],
+			[
+				"fex",
+				"function_exists"
+			],
+			[
+				"REQ",
+				"_REQUEST"
+			],
+			[
+				"reqm",
+				"REQUEST_METHOD"
+			],
+			[
+				"add_",
+				"add_settings_section"
+			],
+			[
+				"register",
+				"register_settings"
+			],
+			[
+				"bl",
+				"base_link"
+			],
+			[
+				"reque",
+				"_REQUEST"
+			],
+			[
+				"isa",
+				"is_array"
+			],
+			[
+				"DateT",
+				"DateTimeZone"
+			],
+			[
+				"DateTime",
+				"DateTimeImmutable"
+			],
+			[
+				"cfform",
+				"createFromFormat"
+			],
+			[
+				"retime",
+				"reg_end_time"
+			],
+			[
+				"scf",
+				"serialize_class_fields"
+			],
+			[
+				"duration",
+				"events_default_event_duration"
+			],
+			[
+				"ds",
+				"duration_str"
+			],
+			[
+				"requ",
+				"REQUEST_URI"
+			],
+			[
+				"arm",
+				"array_merge"
+			],
+			[
+				"ara",
+				"ARRAY_A"
+			],
+			[
+				"prep",
+				"prep_args"
+			],
+			[
+				"gtname",
+				"get_tablename"
+			],
+			[
+				"fgarg",
+				"func_get_args"
+			],
+			[
+				"curren",
+				"current_user_can"
+			],
+			[
+				"bdjr",
+				"bc_djs_resolve_user"
+			],
+			[
+				"posts",
+				"post_status_cls"
+			],
+			[
+				"asp",
+				"assigned_post"
+			],
+			[
+				"chp",
+				"can_have_post"
+			],
+			[
+				"roles",
+				"roles_can_have_dj_posts"
+			],
+			[
+				"icon",
+				"icon_markup"
+			],
+			[
+				"bdj",
+				"bc_djs_get_contactmethod"
+			],
+			[
+				"bjdgetcf",
+				"bc_djs_get_contact_fields"
+			],
+			[
+				"curr",
+				"current_user_can"
+			],
+			[
+				"fo",
+				"foreach\tforeach …"
+			],
+			[
+				"psot",
+				"post_id"
+			],
+			[
+				"mw",
+				"max-width\tproperty"
+			],
+			[
+				"bcdjsgetl",
+				"bc_djs_get_dj_logo"
+			],
+			[
+				"created",
+				"created_from_discord"
+			],
+			[
+				"create",
+				"create_function"
+			],
+			[
+				"discord",
+				"discord_avatar"
+			],
+			[
+				"user",
+				"user_html"
+			],
+			[
+				"exp",
+				"explode"
+			],
+			[
+				"bcdjs",
+				"bc_djs_get_contactmethod"
+			],
+			[
+				"gps",
+				"get_post_status"
+			],
+			[
+				"bcdlop",
+				"bc_dl_options"
+			],
+			[
+				"rset",
+				"redir_settings"
+			],
+			[
+				"bc_dl_render",
+				"bc_dl_render_redirect_fields"
+			],
+			[
+				"um",
+				"user_meta"
+			],
+			[
+				"rolech",
+				"discord_initial_role_changed"
+			],
+			[
+				"uninst",
+				"uninstall_role_change_handler"
+			],
+			[
+				"rch",
+				"role_change_handler"
+			],
+			[
+				"ufs",
+				"user_for_discord_id_meta"
+			],
+			[
+				"bc_dl",
+				"bc_dl_options"
+			],
+			[
+				"logged",
+				"logged_in_via_discord"
+			],
+			[
+				"should",
+				"should_revoke"
+			],
+			[
+				"iss",
+				"is_string"
+			],
+			[
+				"HMV",
+				"HMACVar"
+			],
+			[
+				"HVar",
+				"HMACVar"
+			],
+			[
+				"cure",
+				"current_user"
+			],
+			[
+				"dc",
+				"discord_created"
+			],
+			[
+				"desc",
+				"description_first"
+			],
+			[
+				"afil",
+				"array_filter"
+			],
+			[
+				"required_s",
+				"required_server_role"
+			],
+			[
+				"rr",
+				"required_role"
+			],
+			[
+				"ext",
+				"existing_token"
+			],
+			[
+				"role",
+				"login_role_ids"
+			],
+			[
+				"rsro",
+				"required_server_roles"
+			],
+			[
+				"arf",
+				"array_filter"
+			],
+			[
+				"serverid",
+				"login_server_id"
+			],
+			[
+				"td",
+				"token_data"
+			],
+			[
+				"disc",
+				"discriminator"
+			],
+			[
+				"base64",
+				"base64_encode"
+			],
+			[
+				"author",
+				"Authorization"
+			],
+			[
+				"secret",
+				"secret_auth"
+			],
+			[
+				"Discor",
+				"DiscordError"
+			],
+			[
+				"H",
+				"HTTPError"
+			],
+			[
+				"API",
+				"API_URL"
+			],
+			[
+				"D",
+				"Discord"
+			],
+			[
+				"X-RateLimit-Reset",
+				"X-RateLimit-Reset-After"
+			],
+			[
+				"isn",
+				"is_numeric"
+			],
+			[
+				"getop",
+				"get_option"
+			],
+			[
+				"getru",
+				"get_redirect_uri"
+			],
+			[
+				"parses",
+				"parse_state"
+			],
+			[
+				"oau",
+				"OAUTH2_URL"
+			],
+			[
+				"comm",
+				"commission_date"
+			],
+			[
+				"ttat",
+				"tt_art_tag"
+			],
+			[
+				"fl",
+				"flex-end\talign-items"
+			],
+			[
+				"pdata",
+				"pdata_temp"
+			],
+			[
+				"length",
+				"size_length"
+			],
+			[
+				"compare",
+				"compare_posts"
+			],
+			[
+				"comp",
+				"compare_posts"
+			],
+			[
+				"array_f",
+				"array_filter"
+			],
+			[
+				"max",
+				"max_width"
+			],
+			[
+				"eb",
+				"editingButtonsFor"
+			],
+			[
+				"img",
+				"img_container"
+			],
+			[
+				"ali",
+				"align-items\tproperty"
+			],
+			[
+				"sp",
+				"space-around\tjustify-content"
+			],
+			[
+				"image_",
+				"image_annotations"
+			],
+			[
+				"dm",
+				"desc_markup"
+			],
+			[
+				"fto",
+				"field_type_object"
+			],
+			[
+				"r",
+				"column-reverse\tflex-flow"
+			],
+			[
+				"pending",
+				"pending_users"
+			],
+			[
+				"imported",
+				"imported_ids"
+			],
+			[
+				"invu",
+				"invited_by_user_id"
+			],
+			[
+				"rev",
+				"require_version"
+			],
+			[
+				"require",
+				"require_version"
+			],
+			[
+				"mysl",
+				"mysql_pw"
+			],
+			[
+				"db",
+				"DB_PASSWORD"
+			],
+			[
+				"rel",
+				"real_file"
+			],
+			[
+				"example",
+				"example_file"
+			],
+			[
+				"ask",
+				"ask_bool"
+			],
+			[
+				"WPC",
+				"WPConfigItem"
+			],
+			[
+				"setd",
+				"set_defaults"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/process/email.py",
+			"settings":
+			{
+				"buffer_size": 3534,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/process/password.py",
+			"settings":
+			{
+				"buffer_size": 2427,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/process/totp.py",
+			"settings":
+			{
+				"buffer_size": 5556,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/__init__.py",
+			"settings":
+			{
+				"buffer_size": 5249,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/commands.py",
+			"settings":
+			{
+				"buffer_size": 12847,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/events.py",
+			"settings":
+			{
+				"buffer_size": 8588,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/forms.py",
+			"settings":
+			{
+				"buffer_size": 7920,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/hashes.py",
+			"settings":
+			{
+				"buffer_size": 5967,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/mixins.py",
+			"settings":
+			{
+				"buffer_size": 1394,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/models.py",
+			"settings":
+			{
+				"buffer_size": 3056,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/permissions.py",
+			"settings":
+			{
+				"buffer_size": 11642,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/view.py",
+			"settings":
+			{
+				"buffer_size": 7268,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "__init__.py",
+			"settings":
+			{
+				"buffer_size": 2075,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_events.py",
+			"settings":
+			{
+				"buffer_size": 45854,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_forms.py",
+			"settings":
+			{
+				"buffer_size": 32060,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_hashes.py",
+			"settings":
+			{
+				"buffer_size": 7194,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_mixins.py",
+			"settings":
+			{
+				"buffer_size": 1341,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_models.py",
+			"settings":
+			{
+				"buffer_size": 2129,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_permissions.py",
+			"settings":
+			{
+				"buffer_size": 21911,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_plugin.py",
+			"settings":
+			{
+				"buffer_size": 15057,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_process.py",
+			"settings":
+			{
+				"buffer_size": 34838,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_views.py",
+			"settings":
+			{
+				"buffer_size": 59321,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"python",
+				"Set Syntax: Python"
+			],
+			[
+				"pick",
+				"Color Picker: Insert Color"
+			],
+			[
+				"pic",
+				"Color Picker: Insert Color"
+			],
+			[
+				"picker",
+				"Color Picker: Insert Color"
+			],
+			[
+				"uniq",
+				"Permute Lines: Unique"
+			],
+			[
+				"jsx",
+				"Set Syntax: JSX"
+			],
+			[
+				"php",
+				"Set Syntax: PHP"
+			],
+			[
+				"bash",
+				"Set Syntax: Bourne Again Shell (bash)"
+			],
+			[
+				"sort",
+				"Sort Lines"
+			],
+			[
+				"uni",
+				"Permute Lines: Unique"
+			],
+			[
+				"spaces",
+				"Indentation: Convert to Spaces"
+			],
+			[
+				"packin",
+				"Package Control: Install Package"
+			],
+			[
+				"color",
+				"Color Picker: Insert Color"
+			],
+			[
+				"wrap",
+				"Word Wrap: Toggle"
+			],
+			[
+				"fo",
+				"JSON Reindent: reindent file or selection"
+			],
+			[
+				"reind",
+				"JSON Reindent: reindent file or selection"
+			],
+			[
+				"json",
+				"JSON Reindent: reindent file or selection"
+			],
+			[
+				"packup",
+				"Package Control: Upgrade Package"
+			],
+			[
+				"syndo",
+				"Set Syntax: Dockerfile"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"jin",
+				"Set Syntax: HTML (Jinja2)"
+			],
+			[
+				"j",
+				"Set Syntax: HTML (Jinja2)"
+			],
+			[
+				"setsyjh",
+				"Set Syntax: HTML (Jinja2)"
+			],
+			[
+				"jh",
+				"Project: Refresh Folders"
+			],
+			[
+				"synjh",
+				"Set Syntax: HTML (Jinja2)"
+			],
+			[
+				"htj",
+				"Set Syntax: HTML (Jinja2)"
+			],
+			[
+				"spa",
+				"Indentation: Convert to Spaces"
+			],
+			[
+				"spac",
+				"Indentation: Convert to Spaces"
+			],
+			[
+				"css",
+				"Set Syntax: CSS"
+			],
+			[
+				"pack",
+				"Install Package Control"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/alecelton/Projects/flask-site-framework",
+		"/Users/alecelton/Projects/flask-site-framework/_old",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src/bc_fsf_base",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src/bc_fsf_base/lib",
+		"/Users/alecelton/Projects/flask-site-framework/_old/user",
+		"/Users/alecelton/Projects/flask-site-framework/src",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/process",
+		"/Users/alecelton/Projects/flask-site-framework/tests",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_user"
+	],
+	"file_history":
+	[
+		"/Users/alecelton/Projects/flask-site-framework/src/user/view.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/process/email.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/process/exc.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/process/password.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/process/totp.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/commands.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/events.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/permissions.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/models.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/mixins.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/hashes.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/forms.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_database/test_commands.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_database/test_init.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/user/process/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/database/env.py.template",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/database/commands.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/database/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/database/mixins.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/database/db_types.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_database/test_mixins.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_captcha.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_init/test_flask_config_plugin.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/email.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/captcha.py",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src/bc_fsf_base/plugins.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_email.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_cache/test_cache_plugin.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_init/test_plugin.py",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src/bc_fsf_base/commands.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/cache.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_bootstrap.py",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src/bc_fsf_base/cache.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/bootstrap.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/templates/base/fullscreen.html.j2",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/templates/base/error.html.j2",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/templates/base/base.html.j2",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/static/css/fontawesome/v7.3.1-all.min.css",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_event/test_event.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/event.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/jinja.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_jinja/test_jinja_plugin_and_functions.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_jinja/test_jinja_filters_and_globals.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_init/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/test_init/test_error_handler_plugin.py",
+		"/Users/alecelton/Projects/flask-site-framework/src/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/tests/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src/bc_fsf_base/jinja.py",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src/bc_fsf_base/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/_old/base/src/bc_fsf_base/event.py",
+		"/Users/alecelton/Projects/flask-site-framework/_old/sitemap/src/bc_fsf_sitemap/__init__.py",
+		"/Users/alecelton/Projects/flask-site-framework/base/src/bc_fsf_base/plugins.py",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/AdminPage/UserAuditPage.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/inc/post_type.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/AdminPage/Event/EditPage.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/AdminPage/DJsSettingsPage.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/AdminPage/EditPage.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/inc/announcements.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/Tables/Signup.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/composer.json",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/admin_page.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/UserMeta.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/OAuth.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/inc/admin_page.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/inc/meta.php",
+		"/Users/alecelton/Projects/fallback-wp/wp-content/themes/fallback/src/sass/_single.scss",
+		"/Users/alecelton/Projects/wp-plugin-djs/inc/shortcodes.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/djs.php",
+		"/Users/alecelton/Projects/woof-wp/public/wp-includes/class-wp-user.php",
+		"/Users/alecelton/Projects/woof-wp/public/wp-includes/capabilities.php",
+		"/Users/alecelton/Projects/woof-wp/public/wp-admin/includes/ajax-actions.php",
+		"/Users/alecelton/Projects/fallback-wp/wp-content/themes/fallback/functions.php",
+		"/Users/alecelton/Projects/fallback-wp/wp-content/themes/fallback/single-dj.php",
+		"/Users/alecelton/Projects/wp-theme-grayslate/entry.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/user_edit.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/login_restriction.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/discord_link.php",
+		"/Users/alecelton/Projects/fallback-wp/wp-content/themes/fallback/src/sass/admin.scss",
+		"/Users/alecelton/Projects/fallback-wp/wp-content/themes/fallback/src/../single-dj.php",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/blocks/user-bio/block.json",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/blocks/user-bio/edit.js",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/blocks/user-bio/save.js",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/blocks/user-bio/index.js",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/blocks/user-bio/editor.scss",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/blocks/user-bio/components.js",
+		"/Users/alecelton/Projects/wp-plugin-djs/src/blocks/user-bio/helpers.js",
+		"/Users/alecelton/Projects/wp-plugin-user-profile-management/user_profile_management.php",
+		"/Users/alecelton/Projects/wp-plugin-user-profile-management/composer.json",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/cron.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/API/Client.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/composer.json",
+		"/Users/alecelton/Projects/woof-wp/venv/lib/python3.9/site-packages/jedi/third_party/django-stubs/django-stubs/contrib/admin/sites.pyi",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/setup.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/login_buttons.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/HMACVar.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/Exceptions/RateLimitedError.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/Exceptions/JSONDecodeError.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/Exceptions/HTTPError.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/Exceptions/DiscordError.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/Exceptions/AuthError.php",
+		"/Users/alecelton/Projects/fallback-wp/public/wp-login.php",
+		"/Users/alecelton/Projects/fallback-wp/composer.json",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/AdminPage.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/API/DiscordError.php",
+		"/Users/alecelton/Projects/wp-plugin-discord-link/src/Discord/API/Errors/Base.php",
+		"/Users/alecelton/Projects/woof-wp/wp-config.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/toytime.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/wp-content/themes/toytime/functions.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/Widgets/ArtworkMeta.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/PostTypes/Artwork.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/wp-content/themes/toytime/src/sass/_post.scss",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/wp-content/themes/toytime/src/sass/_archive.scss",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/PostTypes/Toy.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/Widgets/ToyMeta.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/Widgets/ToyListFilter.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/shortcodes.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/FieldTypes/FieldType.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/FieldTypes/ImageAnnotation.php",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/sass/style.scss",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/js/main.js",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/js/lib/modal.js",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/sass/_modal.scss",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/sass/_image_annotations.scss",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/js/lib/annotation.js",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/package.json",
+		"/Users/alecelton/Projects/toys-wrenmouse-wp/src/plugins/toytime/src/field_types/image_annotation_field.php"
+	],
+	"find":
+	{
+		"height": 39.0
+	},
+	"find_in_files":
+	{
+		"height": 101.0,
+		"where_history":
+		[
+			"-venv/",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"@require('user.load",
+			"@require('",
+			"@require('user.can'",
+			"dec_kwargs",
+			"mock_sys",
+			"mock_os.path.exists",
+			"mock_os):",
+			"mock_os",
+			"self.assertEqual(res",
+			"self):",
+			"mock_stderr",
+			"s.path.exists",
+			"mock_os",
+			"app/",
+			"app",
+			"mock_path_exists",
+			"):\n",
+			"assert_called_once_with",
+			"cmd.database_init([])",
+			"base_plugin_module",
+			"extract_params",
+			"ChallengeOptions",
+			"lf):",
+			"self):",
+			"get_captcha",
+			"stylesheets",
+			"_options):",
+			"jinja_global",
+			"views",
+			"publish",
+			"subscribe",
+			"MemoryCacheDriver",
+			"CacheDriver",
+			"commands",
+			"markdown",
+			"Message",
+			"Mail",
+			"Bootstrap",
+			"TemplateNotFound",
+			"Markup",
+			"logger",
+			"logging",
+			"arrow",
+			"ChallengeOptions",
+			"jsonify",
+			"url_for",
+			"abort",
+			"g",
+			"render_template",
+			"request",
+			"current_app",
+			"Blueprint",
+			"Flask",
+			"base64",
+			"json",
+			"Optional",
+			"Union",
+			"Iterable",
+			"plugin = current_app.plugins.get('captcha')",
+			"m = EmailMessage('plugin')",
+			"mock_msg_init):",
+			"render_candidate):",
+			"TemplateNotFound",
+			"text",
+			"mock_message",
+			"self):",
+			"EmailMessage()",
+			"markdown",
+			"elf):",
+			"{current_app.config.get('SITE_NAME')}",
+			"publish",
+			"subscribe",
+			"commands",
+			"tabulate",
+			"arrow",
+			"markdown",
+			"Message",
+			"Mail",
+			"Bootstrap",
+			"TemplateNotFound",
+			"Markup",
+			"AppGroup",
+			"redirect",
+			"flash",
+			"abort",
+			"g",
+			"render_template",
+			"request",
+			"current_app",
+			"Blueprint",
+			"Flask",
+			"click",
+			"logger",
+			"logging",
+			"Iterable",
+			"Optional",
+			"plugins['email']",
+			"AppGroup",
+			"tabulate",
+			"arrow",
+			"Optional",
+			"flask_site_framework",
+			"driver.get",
+			"ock_set):",
+			"self.assertEqual(cache.get_or_fetch('foo', fetch_fn)",
+			"assert_called_once_with",
+			"assert_not_called",
+			"self):",
+			"return_value",
+			"False",
+			"pickle",
+			"hashlib",
+			"wraps",
+			"time",
+			"Lock",
+			"Union",
+			"Any",
+			"publish",
+			"subscribe",
+			"commands",
+			"Plugin",
+			"contextmanager",
+			"Markup",
+			"redirect",
+			"flash",
+			"abort",
+			"g",
+			"render_template"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 11,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/process/email.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3534,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1708,
+								1708
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 21,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/process/password.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2427,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								631,
+								631
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 20,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/process/totp.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5556,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								210,
+								210
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1182.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 19,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5249,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5249,
+								5249
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1062.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/commands.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 12847,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								250,
+								250
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3936.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 18,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/events.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8588,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1660,
+								1660
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2309.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 17,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/forms.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7920,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								421,
+								421
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1161.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 16,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/hashes.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5967,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 15,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/mixins.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1394,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 14,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/models.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3056,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								349,
+								364
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/permissions.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11642,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								123,
+								123
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3679.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "/Users/alecelton/Projects/flask-site-framework/src/flask_site_framework/user/view.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7268,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2869,
+								2869
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 958.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 9,
+			"sheets":
+			[
+				{
+					"buffer": 12,
+					"file": "__init__.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2075,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								134,
+								134
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "test_events.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 45854,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 14,
+					"file": "test_forms.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 32060,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "test_hashes.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7194,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 16,
+					"file": "test_mixins.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1341,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 17,
+					"file": "test_models.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2129,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 18,
+					"file": "test_permissions.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 21911,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 19,
+					"file": "test_plugin.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15057,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 20,
+					"file": "test_process.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 34838,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 21,
+					"file": "test_views.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 59321,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 38.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.5,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "flask_site_framework.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"meta",
+				"wp-plugin-djs/inc/meta.php"
+			],
+			[
+				"dislinkusered",
+				"wp-plugin-discord-link/src/user_edit.php"
+			],
+			[
+				"useredit",
+				"wp-plugin-discord-link/src/user_edit.php"
+			],
+			[
+				"cron",
+				"wp-plugin-discord-link/src/cron.php"
+			],
+			[
+				"clientphp",
+				"wp-plugin-discord-link/src/Discord/API/Client.php"
+			],
+			[
+				"fallwploginp",
+				"fallback-wp/public/wp-login.php"
+			],
+			[
+				"fallbackwplogin",
+				"fallback-wp/public/wp-login.php"
+			],
+			[
+				"httperror",
+				"wp-plugin-discord-link/src/Discord/Exceptions/HTTPError.php"
+			],
+			[
+				"w",
+				"woof-wp/wp-config.php"
+			],
+			[
+				"read",
+				"woof-wp/README.md"
+			],
+			[
+				"config",
+				"devtools/config.json"
+			],
+			[
+				"dump",
+				"devtools/lib/dump.py"
+			],
+			[
+				".htac",
+				"woof-wp/.htaccess"
+			],
+			[
+				"dockerfile",
+				"woof-wp/Dockerfile"
+			],
+			[
+				"dockcom",
+				"wrenmouse-wp/docker-compose.yaml"
+			],
+			[
+				"stlfursenv",
+				"stlfurs-wp/.env"
+			],
+			[
+				"tempdcomo",
+				"devtools/templates/wp/hostinger/docker-compose.yaml"
+			],
+			[
+				"toyswren.git",
+				"toys-wrenmouse-wp/.gitignore"
+			],
+			[
+				"harr.git",
+				"harrietteltonelliott-wp/.gitignore"
+			],
+			[
+				"fallgitignore",
+				"fallback-wp/.gitignore"
+			],
+			[
+				"dev",
+				"devtools/dev"
+			],
+			[
+				"functions",
+				"wp-plugin-djs/node_modules/@typescript-eslint/scope-manager/dist/scope/FunctionScope.js"
+			],
+			[
+				"view",
+				"wp-plugin-djs/dist/blocks/dj-list/view.js"
+			],
+			[
+				"fylusermet",
+				"fyl-wp/src/plugins/fyl/src/inc/usermeta.php"
+			],
+			[
+				"userinv",
+				"fyl-wp/src/plugins/fyl/src/UserInvite.php"
+			],
+			[
+				"fylreadme",
+				"fyl-wp/README.md"
+			],
+			[
+				"fylusermeta",
+				"fyl-wp/src/plugins/fyl/src/inc/usermeta.php"
+			],
+			[
+				"fylhelpers",
+				"fyl-wp/src/plugins/fyl/src/inc/helpers.php"
+			],
+			[
+				"uis",
+				"fyl-wp/src/plugins/fyl/src/UserInviteStatus.php"
+			],
+			[
+				"devwp",
+				"devtools/lib/wp.py"
+			],
+			[
+				"userme",
+				"fyl-wp/src/plugins/fyl/src/inc/usermeta.php"
+			],
+			[
+				"userin",
+				"fyl-wp/src/plugins/fyl/src/UserInvite.php"
+			],
+			[
+				"short",
+				"woof-wp/public/wp-includes/shortcodes.php"
+			],
+			[
+				"listtablephp",
+				"toys-wrenmouse-wp/src/plugins/toytime/src/Auth/UserInviteListTable.php"
+			],
+			[
+				"woofevcompojs",
+				"woof-wp/vendor/oscarotero/env/composer.json"
+			],
+			[
+				"import",
+				"woof-wp/import.py"
+			],
+			[
+				"docker",
+				"Dockerfile"
+			],
+			[
+				"jin",
+				"app/lib/jinja.py"
+			],
+			[
+				"reglistj",
+				"app/templates/registrations/list.jinja"
+			],
+			[
+				"vie",
+				"app/views/registrations.py"
+			],
+			[
+				"base",
+				"app/templates/base.jinja"
+			],
+			[
+				"mod",
+				"app/lib/models.py"
+			],
+			[
+				"viewte",
+				"app/views/templates.py"
+			],
+			[
+				"tempass",
+				"app/templates/templates/assets.jinja"
+			],
+			[
+				"formas",
+				"app/forms/templates.py"
+			],
+			[
+				"jinja",
+				"app/lib/jinja.py"
+			],
+			[
+				"regprint",
+				"app/templates/registrations/print.jinja"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"the",
+				"~/Projects/wp-themes.sublime-project"
+			],
+			[
+				"wpth",
+				"~/Projects/wp-themes.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 793.0
+	},
+	"selected_group": 1,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 239.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -1,3 +1,4 @@
+{%- import "bootstrap5/utils.html" as utils -%}
 <!doctype html>
 <html lang="en">
     <head>
@@ -39,7 +40,7 @@
         <!-- Your page content -->
         {% block content %}
             {% block above_content %}{% endblock %}
-            {{ bootstrap.render_messages() }}
+            {{ utils.render_messages() }}
             {% block main_content %}{% endblock %}
             {% block below_content %}{% endblock %}
         {% endblock %}
